@@ -40,3 +40,4 @@ class CascadeFaceDetector(Detector):
     def enchance_image(self, image: np.ndarray) -> np.ndarray:
         image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
         return image
+

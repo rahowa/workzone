@@ -9,7 +9,7 @@ from flask import Flask, request, render_template, Response
 
 from app import app
 from TEST_face_detection import BBox, BBoxes
-
+from app.camera import Image
 
 @dataclass
 class DetectionResult:

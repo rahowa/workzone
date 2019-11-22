@@ -4,8 +4,6 @@ from app import app
 from app.camera import CamReader
 
 
-
-
 @app.route('/video_feed')
 def video_feed():
     return Response(CamReader(0).gen_encoded_frame(),
@@ -15,4 +13,3 @@ def video_feed():
 @app.route('/stream')
 def stream():
     return render_template('stream.html')
-
