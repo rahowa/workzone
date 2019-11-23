@@ -18,7 +18,6 @@ class DetectionResult:
     bboxes: BBoxes
 
 
-            
 def PLACEHOLDER_detect_objects(image: Image) -> DetectionResult:
     """
     """
