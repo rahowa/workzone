@@ -9,7 +9,9 @@ from flask import Flask, request, render_template, Response
 
 from app import app
 from TEST_face_detection import BBox, BBoxes
-from app.camera import Image
+from .camera import Image
+from .extensions import mongo
+
 
 @dataclass
 class DetectionResult:
@@ -49,12 +51,15 @@ def PLACEHOLDER_recognaize_face(image: Image) -> DetectionResult:
 
 @app.route('/face', methods=['GET', 'POST'])
 def face_recognition_pipeline():
-    image = np.fromstring(request.data, dtype=np.uint8)
-    image = cv2.imdecode(image, cv2.IMREAD_COLOR)
-    detection_result = PLACEHOLDER_recognaize_face(image)
-    response = {'message': f"{detection_result.labels} was detected"}
-    response = jsonpickle.encode(response)
-    return Response(response, status=200, mimetype="application/json")
+    if request.method == 'POST':
+        image = np.fromstring(request.data, dtype=np.uint8)
+        image = cv2.imdecode(image, cv2.IMREAD_COLOR)
+        detection_result = PLACEHOLDER_recognaize_face(image)
+        response = {'message': f"{detection_result.labels} was detected"}
+        response = jsonpickle.encode(response)
+        return Response(response, status=200, mimetype="application/json")
+    else:
+        return render_template("session_history.html")
 
 
 # @app.route('/objects', methods=['GET'])
