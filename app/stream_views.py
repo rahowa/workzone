@@ -12,11 +12,13 @@ def get_video_capture(cam_id: int) -> CamReader:
         caputure = g._capture = CamReader(cam_id)
     return caputure
 
+
 def get_drawer(config_path: str) -> DrawZone:
     drawer = getattr(g, "_zone_drawer", None)
     if drawer is None:
         drawer = g._zone_drawer = DrawZone(config_path)
     return drawer
+
 
 @app.route('/video_feed')
 def video_feed():
@@ -26,6 +28,6 @@ def video_feed():
                     mimetype='multipart/x-mixed-replace; boundary=frame')
 
 
-@app.route('/stream')
+@app.route('/workzone_stream')
 def stream():
     return render_template('stream.html')
