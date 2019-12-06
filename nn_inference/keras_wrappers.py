@@ -1,7 +1,7 @@
 import keras
 import numpy as np
 from typing import Union, Any
-from .base_wrapper import BaseWrapper, Image, Descriptor
+from .base_wrapper import BaseWrapper, Image, Descriptors
 
 
 class KerasBase(BaseWrapper):
@@ -9,7 +9,7 @@ class KerasBase(BaseWrapper):
         super().__init__()
         self.model = model
         self.config = config
-        if isinstance(model, (str)):
+        if isinstance(config, (str)):
             self.config = self.load_config(config)
         else:
             self.config = config
@@ -17,6 +17,6 @@ class KerasBase(BaseWrapper):
     def preprocess_image(self, image: Image) -> Image:
         return image / 255.0
 
-    def predict(self, data: Image) -> Descriptor:
-        descriptor = self.model.predict(data[np.newaxis, ...])
-        return descriptor
+    def predict(self, data: Image) -> Descriptors:
+        descriptors = self.model.predict(data[np.newaxis, ...])
+        return descriptors

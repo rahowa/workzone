@@ -1,15 +1,18 @@
 import json
 import numpy as np
-from typing import Dict, Any
+from typing import Dict, Any, List, Tuple
 from abc import ABC, abstractmethod
 
 Image = np.ndarray
 Descriptor = np.ndarray
+Descriptors = List[Descriptor]
+BBox = Tuple[int, int, int, int]
+BBoxes = Tuple[BBox, ...]
 
 
 class BaseWrapper(ABC):
     @abstractmethod
-    def __init__(self, config, model, *args, **kwargs):
+    def __init__(self, *args, **kwargs):
         raise NotImplementedError
 
     @abstractmethod

@@ -2,7 +2,7 @@ import torch
 import numpy as np 
 from typing import Union, Any
 
-from .base_wrapper import BaseWrapper, Image, Descriptor
+from .base_wrapper import BaseWrapper, Image, Descriptors
 
 
 class PytorchBase(BaseWrapper):
@@ -10,7 +10,7 @@ class PytorchBase(BaseWrapper):
         super().__init__()
         self.model = model
         self.config = config
-        if isinstance(model, (str)):
+        if isinstance(config, (str)):
             self.config = self.load_config(config)
         else:
             self.config = config
@@ -22,10 +22,10 @@ class PytorchBase(BaseWrapper):
         image /= 255.0
         return image
 
-    def predict(self, data: Image) -> Descriptor:
+    def predict(self, data: Image) -> Descriptors:
         data = self.preprocess_image(data)
         self.model.eval()
         with torch.no_grad():
-            descriptor = self.model(data)
-            descriptor = descriptor.cpu().numpy()
-        return descriptor
+            descriptors = self.model(data)
+            descriptors = descriptor.cpu().numpy()
+        return descriptors
