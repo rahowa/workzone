@@ -50,8 +50,6 @@ class CamReader:
             self.capture.release()
 
 
-
-
 def encode_image(image: Image) -> bytes:
     encoded_img = cv2.imencode(image, 'jpeg')[1]
     return encoded_img.tobytes()
