@@ -1,7 +1,7 @@
 from flask import Response, render_template, g
 
 from app import app
-from app.camera import (CamReader, Image, 
+from app.camera import (CamReader, Image,
                         wrap_image, encode_image)
 from app.drawer import DrawZone
 
