@@ -1,8 +1,9 @@
 import os
 from dotenv import load_dotenv
 
+
+dotenv_path = os.path.join(os.path.dirname(__file__), '.env')
 load_dotenv(verbose=True)
-basedir = os.path.abspath(os.path.dirname(__file__))
 
 
 class MainConfig:
