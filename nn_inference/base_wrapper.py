@@ -12,10 +12,6 @@ BBoxes = Tuple[BBox, ...]
 
 class BaseWrapper(ABC):
     @abstractmethod
-    def __init__(self, *args, **kwargs):
-        raise NotImplementedError
-
-    @abstractmethod
     def predict(self, *args, **kwargs):
         raise NotImplementedError
 
