@@ -9,7 +9,6 @@ class PytorchBase(BaseWrapper):
     def __init__(self, config: Union[str, Any], model: torch.Module):
         super().__init__()
         self.model = model
-        self.config = config
         if isinstance(config, (str)):
             self.config = self.load_config(config)
         else:
@@ -27,5 +26,5 @@ class PytorchBase(BaseWrapper):
         self.model.eval()
         with torch.no_grad():
             descriptors = self.model(data)
-            descriptors = descriptor.cpu().numpy()
+            descriptors = descriptors.cpu().numpy()
         return descriptors

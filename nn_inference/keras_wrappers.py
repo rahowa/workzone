@@ -8,7 +8,6 @@ class KerasBase(BaseWrapper):
     def __init__(self, config: Union[str, Any], model: keras.models.Model):
         super().__init__()
         self.model = model
-        self.config = config
         if isinstance(config, (str)):
             self.config = self.load_config(config)
         else:

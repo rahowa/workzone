@@ -6,25 +6,26 @@ from .base_wrapper import BaseWrapper, Image, Descriptor, Descriptors, BBoxes
 
 class FaceDetectionLibWrapper(BaseWrapper):
     def __init__(self, config: Union[str, Any]):
-        super().__init__()
-        self.config = config
         if isinstance(config, (str)):
             self.config = self.load_config(config)
-        else:
+        elif isinstance(config, (dict)):
             self.config = config
-        self.model = config['model_type']
-        self.n_upsample = config['number_of_times_to_upsample']
+        else:
+            raise NotImplementedError
+
+        self.model = self.config['model_type']
+        self.n_upsample = self.config['number_of_times_to_upsample']
 
     def preprocess_image(self, image: Image) -> Image:
         if image.mean() > 1.0:
-            return image / 255.0
-        else:
             return image
+        else:
+            return np.round(image * 255).astype(np.uint8)
 
     def get_locations(self, data: Image) -> BBoxes:
         face_locations = fr.face_locations(data,
                                            number_of_times_to_upsample=self.n_upsample,
-                                           model=self.model
+                                           model=self.model)
         return face_locations
 
     def get_encodings(self, data: Image, bboxes: BBoxes) -> Descriptors:
