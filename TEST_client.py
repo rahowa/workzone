@@ -24,4 +24,4 @@ if __name__ == "__main__":
         time.sleep(0.5)
         response = requests.post(test_url, data=img_encoded.tostring(),
                                  headers=headers)
-    print(json.loads(response.text))
+        print(json.loads(response.text))
