@@ -1,4 +1,5 @@
 import sys
+import numpy as np
 from collections import deque
 from typing import Dict, Any, Union, List
 from flask_pymongo import PyMongo
@@ -117,7 +118,9 @@ class MongoController:
 
         descriptors = deque()
         for worker in workers:
-            descriptors.append(worker['encoding'])
+            encoding = worker['encoding']
+            encoding = np.array(encoding).reshape(-1, )
+            descriptors.append(encoding)
         return descriptors
 
     def update_descriptor(self, worker: Any,

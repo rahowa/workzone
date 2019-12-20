@@ -1,16 +1,14 @@
 import os
 import sys
 import cv2
-import numpy as np 
+import numpy as np
 from typing import List, Union
 from collections import defaultdict, deque
 
-from .extensions import mongo
 from .mongo_controller import MongoController
 
 sys.path.append('../')
 from nn_inference.base_wrapper import BaseWrapper
-from nn_inference.external_wrappers import FaceDetectionLibWrapper
 
 
 class FillDatabase:
