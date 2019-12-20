@@ -5,6 +5,10 @@ from .base_wrapper import BaseWrapper, Image, Descriptors
 
 
 class KerasBase(BaseWrapper):
+    """
+    Example wrapper for pure Keras face reсognition system
+    """
+    
     def __init__(self, config: Union[str, Any], model: keras.models.Model):
         super().__init__()
         self.model = model

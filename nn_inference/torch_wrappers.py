@@ -6,6 +6,9 @@ from .base_wrapper import BaseWrapper, Image, Descriptors
 
 
 class PytorchBase(BaseWrapper):
+    """
+    Example wrapper for pure PyToch face reсognition system
+    """
     def __init__(self, config: Union[str, Any], model: torch.Module):
         super().__init__()
         self.model = model
