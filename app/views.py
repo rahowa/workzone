@@ -19,6 +19,7 @@ from nn_inference.external_wrappers import FaceDetectionLibWrapper
 
 main = Blueprint('main', __name__)
 
+
 @dataclass
 class DetectionResult:
     image: np.ndarray
@@ -40,12 +41,14 @@ def PLACEHOLDER_recognaize_face(image: Image,
     face_encodings = fr.face_encodings(image, face_locations)
 
     known_face_encodings = db_controller.all_descriptors()
+    known_face_encodings = list(filter(lambda x: not np.isnan(x).all(), known_face_encodings))
     labels = deque(maxlen=len(face_encodings))
 
     if len(known_face_encodings) == 0:
         return DetectionResult(image, [-1], [0, 0, 1, 1])
 
     for face_encoding in face_encodings:
+        print(face_encoding.shape, known_face_encodings[0].shape)
         matches = fr.compare_faces(known_face_encodings, face_encoding)
         label = -1
         if True in matches:
