@@ -38,7 +38,7 @@ class MongoController:
         if isinstance(worker_id, (str)):
             return self.table.find({'id': worker_id})
         elif isinstance(worker_id, (Descriptor)):
-            return self.table.find({"face_descriptor": worker_id})
+            return self.table.find({"encoding": worker_id})
         else:
             raise AttributeError
 
@@ -51,7 +51,7 @@ class MongoController:
 
         descriptors = deque()
         for worker in workers:
-            descriptors.append(worker['face_descriptor'])
+            descriptors.append(worker['encoding'])
         return descriptors
 
     def update_descriptor(self, worker: Any,
