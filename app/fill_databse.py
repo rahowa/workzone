@@ -21,7 +21,7 @@ class FillDatabase:
 
     def create_encodings(self, certain_persons: Union[str, List[str]]):
         if isinstance(certain_persons, (list, tuple)):
-            path_to_faces = os.path.join(**certain_persons[0].split('/')[:-1])
+            path_to_faces = os.path.join(*certain_persons[0].split('/')[:-1])
             persons = certain_persons
         elif isinstance(certain_persons, (str)):
             path_to_faces = certain_persons
@@ -32,7 +32,7 @@ class FillDatabase:
         for person in persons:
             path_to_person_faces = os.path.join(path_to_faces, person)
             persons_faces = os.listdir(path_to_person_faces)
-            person_encoding_deq = deque(maxlen=len(persons_faces))
+            person_encoding_deq: deque = deque(maxlen=len(persons_faces))
 
             for face_path in persons_faces:
                 face_image = cv2.imread(os.path.join(path_to_person_faces, face_path))
@@ -47,8 +47,7 @@ class FillDatabase:
                 else:
                     face_enc = self.fr_module.get_encodings(face_image, face_bounding_boxes)
                     person_encoding_deq.append(face_enc)
-            person_encoding_deq = np.asarray(person_encoding_deq)
-            person_encoding = person_encoding_deq.mean(0).tolist()
+            person_encoding = np.asarray(person_encoding_deq).mean(0).tolist()
             self.persons_encodings.update({person: person_encoding})
 
     def fill_database(self):
