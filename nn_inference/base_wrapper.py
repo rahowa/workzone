@@ -1,11 +1,12 @@
 import json
 import numpy as np
-from typing import Dict, Any, List, Tuple
 from abc import ABC, abstractmethod
+from nptyping import Array
+from typing import Dict, Any, List, Tuple
 
-Image = np.ndarray
-Descriptor = np.ndarray
-Descriptors = List[Descriptor]
+Image = Array[int]
+Descriptor = Array[float]
+Descriptors = Tuple[Array[float], ...]
 BBox = Tuple[int, int, int, int]
 BBoxes = Tuple[BBox, ...]
 
@@ -16,7 +17,7 @@ class BaseWrapper(ABC):
     models based on neural networks
     """
     @abstractmethod
-    def predict(self, *args, **kwargs):
+    def predict(self, image: Image):
         """
         Abstract method for predict result based on
         input image
