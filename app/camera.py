@@ -1,7 +1,8 @@
 import cv2
-import numpy as np
-from typing import List, Any, Union
-Image = np.ndarray
+from flask import g
+from typing import List, Any, Union, Iterator
+
+from app.base_types import Image
 
 
 class CamReader:
@@ -38,12 +39,11 @@ class CamReader:
         while True:
             yield self.get_frame()
 
-    def gen_encoded_frame(self, enchance: Union[Any, List[Any]]=None) -> bytes:
+    def gen_encoded_frame(self, enchance: Union[Any, List[Any]]=None) -> Iterator[bytes]:
         while True:
             frame = self.get_frame(enchance)
             frame = cv2.imencode('.jpg', frame)[1].tobytes()
-            yield (b'--frame\r\n'
-                   b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n')
+            yield b'--frame\r\n'b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n'
 
     def __del__(self):
         if self.capture:
@@ -55,6 +55,8 @@ def encode_image(image: Image) -> bytes:
     return encoded_img.tobytes()
 
 
-def wrap_image(image: bytes) -> str:
-    return (b'--frame\r\n'
-            b'Content-Type: image/jpeg\r\n\r\n' + image + b'\r\n')
+def get_video_capture(cam_id: int) -> CamReader:
+    caputure = getattr(g, "_capture", None)
+    if caputure is None:
+        caputure = g._capture = CamReader(cam_id)
+    return caputure
