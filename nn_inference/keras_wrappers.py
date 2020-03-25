@@ -1,7 +1,8 @@
 import keras
 import numpy as np
 from typing import Union, Any
-from .base_wrapper import BaseWrapper, Image, Descriptors
+from .base_wrapper import BaseWrapper
+from app.base_types import Image, Descriptor, Descriptors
 
 
 class KerasBase(BaseWrapper):

@@ -1,7 +1,8 @@
 import numpy as np
 import face_recognition as fr
-from typing import Union, Any
-from .base_wrapper import BaseWrapper, Image, Descriptor, Descriptors, BBoxes
+from typing import List, Union, Any
+from .base_wrapper import BaseWrapper
+from app.base_types import Image, Descriptor, Descriptors, BBoxes
 
 
 class FaceRecognitionLibWrapper(BaseWrapper):
@@ -113,3 +114,23 @@ class FaceRecognitionLibWrapper(BaseWrapper):
         face_locations = self.get_locations(data)
         face_encodings = self.get_encodings(data, face_locations)
         return face_encodings
+
+
+    def match(self, sample: Descriptor, descriptors: Descriptors) -> List[bool]:
+        """
+        Compute similarity between descriptors and provided sample (also descriptor)
+
+        Parameters
+        ----------
+            sample: Descriptor, np.ndarray
+                Descriptor of current face
+            
+            descriptors: Descriptors
+                All available descriptors to match
+            
+        Returns
+        -------
+            matches:
+                List of bools where True when sample mathch with descriptor
+        """
+        return fr.compare_faces(sample, descriptors) 

@@ -1,14 +1,9 @@
 import json
 import numpy as np
+from typing import Dict, Any
 from abc import ABC, abstractmethod
-from nptyping import Array
-from typing import Dict, Any, List, Tuple
 
-Image = Array[int]
-Descriptor = Array[float]
-Descriptors = Tuple[Array[float], ...]
-BBox = Tuple[int, int, int, int]
-BBoxes = Tuple[BBox, ...]
+from app.base_types import Image
 
 
 class BaseWrapper(ABC):
@@ -25,7 +20,7 @@ class BaseWrapper(ABC):
         raise NotImplementedError
 
     @abstractmethod
-    def preprocess_image(self, *args, **kwargs):
+    def preprocess_image(self, image: Image):
         """
         Abstract method for image preprocessing
         for certain model/framework
