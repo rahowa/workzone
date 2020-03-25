@@ -19,6 +19,6 @@ def draw_bboxes(image: Image, bboxes: BBoxes) -> Image:
     color = (255, 255//2, 255//3)
     for bbox in bboxes:
         pt1 = (bbox[0], bbox[1])
-        pt2 = (bbox[2, bbox[3]])
+        pt2 = (bbox[2], bbox[3])
         image = cv2.rectangle(image, pt1, pt2, color=color, thickness=2)
     return image
