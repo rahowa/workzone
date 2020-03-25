@@ -121,7 +121,27 @@ class MongoController:
             encoding = worker['encoding']
             encoding = np.array(encoding).reshape(-1, )
             descriptors.append(encoding)
-        return descriptors
+        return tuple(descriptors)
+
+
+    def all_valid_descriptors(self, condition: Dict[str, Any] = None) -> Descriptors:
+        """
+        Return all valid descriptors of all workers by condition
+
+        Parameters
+        ----------
+            condition: Dict[str, Any], None
+                Condition to query
+
+        Returns
+        -------
+            descriptors: Descriptors
+                All finded descriptors
+        """
+
+        descriptors = self.all_descriptors(condition)
+        return tuple(filter(lambda x: not np.isnan(x).all(), descriptors))
+
 
     def update_descriptor(self, worker: Any,
                           descriptor: Descriptor) -> bool:
