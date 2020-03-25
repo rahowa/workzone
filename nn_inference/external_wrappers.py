@@ -4,7 +4,7 @@ from typing import Union, Any
 from .base_wrapper import BaseWrapper, Image, Descriptor, Descriptors, BBoxes
 
 
-class FaceDetectionLibWrapper(BaseWrapper):
+class FaceRecognitionLibWrapper(BaseWrapper):
     """
     Wrapper for face_recognition library at
     https://github.com/ageitgey/face_recognition 
