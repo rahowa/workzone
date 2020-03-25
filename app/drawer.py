@@ -11,7 +11,7 @@ from robot_work_zone_estimation.src.feat_extractor import MakeDescriptor
 from robot_work_zone_estimation.src.homography import ComputeHomography
 from robot_work_zone_estimation.src.utills import (projection_matrix,
                                                    render, draw_corner)
-from .camera import Image
+from app.base_types import *
 
 
 def read_json(path: str) -> Dict[str, Any]:
@@ -67,3 +67,11 @@ class DrawZone:
                                self.column_descriptor.get_marker_size(),
                                False)
         return scene
+
+
+
+def get_drawer(config_path: str) -> DrawZone:
+    drawer = getattr(g, "_zone_drawer", None)
+    if drawer is None:
+        drawer = g._zone_drawer = DrawZone(config_path)
+    return drawer
