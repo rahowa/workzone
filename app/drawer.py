@@ -23,7 +23,7 @@ def read_json(path: str) -> Dict[str, Any]:
 class DrawZone:
     """
     """
-    def __init__(self, config_path: str):
+    def __init__(self, config_path: str) -> None:
         self.config_path = config_path
         self.config = read_json(config_path)
 
@@ -50,7 +50,7 @@ class DrawZone:
         self.homography_alg = ComputeHomography(cv2.BFMatcher_create(cv2.NORM_HAMMING, 
                                                 crossCheck=True))
 
-    def __call__(self, scene: Image):
+    def __call__(self, scene: Image) -> Image:
         kp_marker, des_marker = self.column_descriptor.get_marker_data()
         kp_scene, des_scene = self.column_descriptor.get_frame_data(scene)
         if des_marker is not None and des_scene is not None:
