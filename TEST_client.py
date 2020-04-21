@@ -11,6 +11,7 @@ import requests
 
 addr = 'http://127.0.0.1:5000'
 test_url = addr + '/face/detect'
+path_to_test_image = "./test_image.jpg"
 
 # prepare headers for http request
 content_type = 'image/jpeg'
@@ -26,11 +27,12 @@ if __name__ == "__main__":
     #                              headers=headers)
     #     print(json.loads(response.text))
 
-    cap = cv2.VideoCapture(0)
+    # cap = cv2.VideoCapture(0)
+    img = cv2.imread(path_to_test_image)
     while True:
-        time.sleep(1)
-        _, frame = cap.read()
-        _, image_to_send = cv2.imencode('.jpg', frame)
+        # time.sleep(1)
+        # _, frame = cap.read()
+        _, image_to_send = cv2.imencode('.jpg', img)
         response = requests.post(test_url, data=image_to_send.tostring(),
                                  headers=headers)
         print(response.text)
