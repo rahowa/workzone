@@ -8,7 +8,7 @@ from collections import defaultdict, deque
 from .mongo_controller import MongoController
 
 sys.path.append('../')
-from nn_inference.base_wrapper import BaseWrapper
+from app.nn_inference.common.base_wrapper import BaseWrapper
 
 
 class FillDatabase:
