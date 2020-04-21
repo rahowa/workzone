@@ -1,16 +1,16 @@
-
 import cv2
 import json
 import time
 import requests
+
 
 """
     Original implementation at 
     https://gist.github.com/kylehounslow/767fb72fde2ebdd010a0bf4242371594
 """
 
-addr = 'http://localhost:5000'
-test_url = addr + '/face'
+addr = 'http://127.0.0.1:5000'
+test_url = addr + '/face/detect'
 
 # prepare headers for http request
 content_type = 'image/jpeg'
@@ -33,4 +33,4 @@ if __name__ == "__main__":
         _, image_to_send = cv2.imencode('.jpg', frame)
         response = requests.post(test_url, data=image_to_send.tostring(),
                                  headers=headers)
-        print(json.loads(response.text))
+        print(response.text)
