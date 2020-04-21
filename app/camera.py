@@ -1,6 +1,7 @@
 import cv2
 from flask import g
-from typing import List, Any, Union, Iterator
+import numpy as np
+from typing import List, Any, Union, Iterator, Callable
 
 from app.base_types import Image
 
@@ -8,7 +9,7 @@ from app.base_types import Image
 class CamReader:
     """
     """
-    def __init__(self, cam_id: int, height: int=480, width: int=640):
+    def __init__(self, cam_id: int, height: int = 480, width: int = 640):
         self.cam_id = cam_id
         self.height = height
         self.width = width 
@@ -20,17 +21,14 @@ class CamReader:
     def __repr__(self):
         return f"CamReader_{self.cam_id}"
 
-    def __str__(self):
-        return f"CamReader_{self.cam_id}"
-
-    def get_frame(self, enchance: Union[Any, List[Any]]=None) -> Image:
+    def get_frame(self,
+                  enchance: Union[Callable[[Image], Image], List[Callable[[Image], Image]]] = None) -> Image:
         _, frame = self.capture.read()
 
         if enchance is not None:
             if isinstance(enchance, (list, tuple)):
                 for ench in enchance:
                     frame = ench(frame)
-            # elif isinstance(enchance, callable):
             else:
                 frame = enchance(frame)
         return frame
@@ -39,7 +37,7 @@ class CamReader:
         while True:
             yield self.get_frame()
 
-    def gen_encoded_frame(self, enchance: Union[Any, List[Any]]=None) -> Iterator[bytes]:
+    def gen_encoded_frame(self, enchance: Union[Any, List[Any]] = None) -> Iterator[bytes]:
         while True:
             frame = self.get_frame(enchance)
             frame = cv2.imencode('.jpg', frame)[1].tobytes()
@@ -60,3 +58,8 @@ def get_video_capture(cam_id: int) -> CamReader:
     if caputure is None:
         caputure = g._capture = CamReader(cam_id)
     return caputure
+
+
+def deocode_image(encoded_image: bytes) -> Image:
+    image = np.fromstring(encoded_image, dtype=np.uint8)
+    return cv2.imdecode(image, cv2.IMREAD_COLOR)
