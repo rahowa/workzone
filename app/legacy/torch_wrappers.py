@@ -1,9 +1,8 @@
-import torch 
-import numpy as np 
+import torch
 from typing import Union, Any
 
-from .base_wrapper import BaseWrapper
-from app.base_types import Image, Descriptor, Descriptors
+from app.nn_inference import BaseWrapper
+from app.base_types import Image, Descriptors
 
 
 class PytorchBase(BaseWrapper):

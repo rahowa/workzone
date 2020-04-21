@@ -1,8 +1,8 @@
 import numpy as np
 import face_recognition as fr
-from typing import List, Union, Any
-from .base_wrapper import BaseWrapper
-from app.base_types import Image, Descriptor, Descriptors, BBoxes
+from typing import List, Union, Any, Tuple
+from app.nn_inference.common.base_wrapper import BaseWrapper
+from app.base_types import Image, Descriptor, Descriptors, Boxes, FaceResult, Box
 
 
 class FaceRecognitionLibWrapper(BaseWrapper):
@@ -36,7 +36,7 @@ class FaceRecognitionLibWrapper(BaseWrapper):
         self.model = self.config['model_type']
         self.n_upsample = self.config['number_of_times_to_upsample']
 
-    def preprocess_image(self, image: Image) -> Image:
+    def preprocess(self, image: Image) -> Image:
         """
         Preprocess input image for model
         Parameters
@@ -55,7 +55,21 @@ class FaceRecognitionLibWrapper(BaseWrapper):
         else:
             return np.round(image * 255).astype(np.uint8)
 
-    def get_locations(self, data: Image) -> BBoxes:
+    def convert_boxes(self, box: Tuple[int, int, int, int]) -> Box:
+        """Convert box from (ymin xmin ymax xmax) to (xmin ymin xmax ymax)
+
+        Parameters
+        ----------
+            box: Tuple[int, int, int, int]
+                Original wrong box
+        Return
+        ------
+            Bounding box in right format
+        """
+
+        return box[1], box[0], box[3], box[2]
+
+    def get_locations(self, data: Image) -> Boxes:
         """
         Returns location of each face at the image
 
@@ -73,9 +87,10 @@ class FaceRecognitionLibWrapper(BaseWrapper):
         face_locations = fr.face_locations(data,
                                            number_of_times_to_upsample=self.n_upsample,
                                            model=self.model)
-        return face_locations
 
-    def get_encodings(self, data: Image, bboxes: BBoxes) -> Descriptors:
+        return tuple(self.convert_boxes(box) for box in face_locations)
+
+    def get_encodings(self, data: Image, bboxes: Boxes) -> Descriptors:
         """
         Returns descriptors for each face at the image
 
@@ -95,7 +110,7 @@ class FaceRecognitionLibWrapper(BaseWrapper):
         face_encodings = fr.face_encodings(data, bboxes)
         return face_encodings
 
-    def predict(self, data: Image) -> Descriptors:
+    def predict(self, data: Image) -> FaceResult:
         """
         Returns descriptors for each face at the image
 
@@ -110,11 +125,10 @@ class FaceRecognitionLibWrapper(BaseWrapper):
                 List descriptors for each face
         """
         
-        data = self.preprocess_image(data)
+        data = self.preprocess(data)
         face_locations = self.get_locations(data)
         face_encodings = self.get_encodings(data, face_locations)
-        return face_encodings
-
+        return FaceResult(list(), face_locations, list(), list(face_encodings))
 
     def match(self, sample: Descriptor, descriptors: Descriptors) -> List[bool]:
         """

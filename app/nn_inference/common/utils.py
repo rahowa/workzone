@@ -1,8 +1,9 @@
 import cv2
-from .base_wrapper import Image, BBoxes
+from typing import List, Any
+from app.base_types import Image, Boxes
 
 
-def draw_bboxes(image: Image, bboxes: BBoxes) -> Image:
+def draw_bboxes(image: Image, bboxes: Boxes) -> Image:
     """ Draw bbox in format (xmin, ymin, xmax, ymax)
         over the image
 
@@ -22,3 +23,11 @@ def draw_bboxes(image: Image, bboxes: BBoxes) -> Image:
         pt2 = (bbox[2], bbox[3])
         image = cv2.rectangle(image, pt1, pt2, color=color, thickness=2)
     return image
+
+
+def chunks(lst: List[Any], n: int):
+    """Yield successive n-sized chunks from lst
+    """
+    for i in range(0, len(lst), n):
+        yield lst[i:i + n]
+

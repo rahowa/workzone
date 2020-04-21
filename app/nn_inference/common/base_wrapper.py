@@ -1,9 +1,8 @@
 import json
-import numpy as np
 from typing import Dict, Any
 from abc import ABC, abstractmethod
 
-from app.base_types import Image
+from app.base_types import Image, BaseResult, List
 
 
 class BaseWrapper(ABC):
@@ -12,7 +11,7 @@ class BaseWrapper(ABC):
     models based on neural networks
     """
     @abstractmethod
-    def predict(self, image: Image):
+    def predict(self, image: Image) -> List[BaseResult]:
         """
         Abstract method for predict result based on
         input image
@@ -20,7 +19,7 @@ class BaseWrapper(ABC):
         raise NotImplementedError
 
     @abstractmethod
-    def preprocess_image(self, image: Image):
+    def preprocess(self, image: Image) -> Image:
         """
         Abstract method for image preprocessing
         for certain model/framework
@@ -45,3 +44,6 @@ class BaseWrapper(ABC):
         with open(path_to_config, 'r') as conf_file:
             config = json.load(conf_file)
         return config
+
+    def load(self):
+        pass
