@@ -2,5 +2,5 @@
 
     {% block content %}
     <h1>Video Streaming Demonstration</h1>
-    <img src="{{ url_for('video_feed') }}">
+    <img src="{{ url_for('blueprint_streams.video_feed', operation=operation) }}">
     {% endblock %}
