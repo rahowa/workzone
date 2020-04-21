@@ -3,10 +3,9 @@ import numpy as np
 from collections import deque
 from typing import Dict, Any, Union, List
 from flask_pymongo import PyMongo
-# from .fill_databse import FillDatabase
 
 sys.path.append('../')
-from nn_inference.base_wrapper import Descriptor, Descriptors
+from app.base_types import Descriptor, Descriptors
 
 
 class MongoController:
@@ -123,7 +122,6 @@ class MongoController:
             descriptors.append(encoding)
         return tuple(descriptors)
 
-
     def all_valid_descriptors(self, condition: Dict[str, Any] = None) -> Descriptors:
         """
         Return all valid descriptors of all workers by condition
@@ -142,8 +140,6 @@ class MongoController:
         descriptors = self.all_descriptors(condition)
         return tuple(filter(lambda x: not np.isnan(x).all(), descriptors))
 
-
-    def update_descriptor(self, worker: Any,
-                          descriptor: Descriptor) -> bool:
+    def update_descriptor(self, worker: Any, descriptor: Descriptor) -> bool:
         pass 
 
