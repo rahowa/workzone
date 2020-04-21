@@ -2,7 +2,7 @@ import cv2
 import sys
 import json
 import numpy as np
-from typing import Dict, Any
+from flask import g
 
 sys.path.append('../robot_work_zone_estimation/.')
 
@@ -11,13 +11,38 @@ from robot_work_zone_estimation.src.feat_extractor import MakeDescriptor
 from robot_work_zone_estimation.src.homography import ComputeHomography
 from robot_work_zone_estimation.src.utills import (projection_matrix,
                                                    render, draw_corner)
-from app.base_types import *
+from app.base_types import Dict, Any, Image
+from app.nn_inference.faces.wrappers.face_recognition_lib_wrapper import FaceRecognitionLibWrapper
+from app.nn_inference.common.utils import draw_bboxes
 
 
 def read_json(path: str) -> Dict[str, Any]:
     with open(path, 'r') as json_file:
         file = json.load(json_file)
     return file
+
+
+#TODO: implement classes
+class DrawRecognition:
+    pass
+
+
+class DrawObjectDetection:
+    pass
+
+
+class DrawSegmentation:
+    pass
+
+
+class DrawFaceDetection:
+    def __init__(self, detector: FaceRecognitionLibWrapper) -> None:
+        self.detector = detector
+
+    def __call__(self, scene: Image) -> Image:
+        det_result = self.detector.get_locations(scene)
+        scene = draw_bboxes(scene, det_result)
+        return scene
 
 
 class DrawZone:
@@ -69,9 +94,16 @@ class DrawZone:
         return scene
 
 
-
-def get_drawer(config_path: str) -> DrawZone:
+def get_workzone_drawer(config_path: str) -> DrawZone:
     drawer = getattr(g, "_zone_drawer", None)
     if drawer is None:
         drawer = g._zone_drawer = DrawZone(config_path)
+    return drawer
+
+
+def get_face_detection_drawer() -> DrawFaceDetection:
+    config = {"model_type": "hog", "number_of_times_to_upsample": 1}
+    drawer = getattr(g, "_face_det_drawer", None)
+    if drawer is None:
+        drawer = g._face_det_drawer = DrawFaceDetection(FaceRecognitionLibWrapper(config))
     return drawer
