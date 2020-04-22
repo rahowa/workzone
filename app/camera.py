@@ -48,18 +48,8 @@ class CamReader:
             self.capture.release()
 
 
-def encode_image(image: Image) -> bytes:
-    encoded_img = cv2.imencode(image, 'jpeg')[1]
-    return encoded_img.tobytes()
-
-
 def get_video_capture(cam_id: int) -> CamReader:
     caputure = getattr(g, "_capture", None)
     if caputure is None:
         caputure = g._capture = CamReader(cam_id)
     return caputure
-
-
-def deocode_image(encoded_image: bytes) -> Image:
-    image = np.fromstring(encoded_image, dtype=np.uint8)
-    return cv2.imdecode(image, cv2.IMREAD_COLOR)

@@ -1,8 +1,9 @@
 import typer
 from typing import Sequence, Union, List, Optional
 from app.nn_inference.common.base_wrapper import BaseWrapper
-from app.base_types import Image, BaseResult
 
+from app.base_types import Image
+from app.result_types import BaseResult
 
 class NetworkContext:
     def __init__(self, tag: str = "Default context") -> None:

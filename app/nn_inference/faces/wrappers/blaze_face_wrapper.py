@@ -5,7 +5,8 @@ from pathlib import Path
 from typing import Sequence, Iterator, List
 
 from app.nn_inference.common.base_wrapper import BaseWrapper
-from app.base_types import Image, FaceResult
+from app.base_types import Image
+from app.result_types import FaceResult
 from app.nn_inference.faces.BlazeFace_PyTorch.blazeface import BlazeFace
 from app.nn_inference.common.utils import chunks
 

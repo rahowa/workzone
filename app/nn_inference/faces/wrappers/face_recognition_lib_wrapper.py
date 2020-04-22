@@ -2,8 +2,9 @@ import numpy as np
 import face_recognition as fr
 from typing import List, Union, Any, Tuple
 from app.nn_inference.common.base_wrapper import BaseWrapper
-from app.base_types import Image, Descriptor, Descriptors, Boxes, FaceResult, Box
 
+from app.base_types import Image, Descriptor, Descriptors, Boxes, Box
+from app.result_types import FaceResult
 
 class FaceRecognitionLibWrapper(BaseWrapper):
     """

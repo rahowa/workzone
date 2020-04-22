@@ -2,7 +2,9 @@ import json
 from typing import Dict, Any, Sequence
 from abc import ABC, abstractmethod
 
-from app.base_types import Image, BaseResult, List
+from typing import List
+from app.base_types import Image
+from app.result_types import BaseResult
 
 
 class BaseWrapper(ABC):
