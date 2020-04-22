@@ -4,7 +4,7 @@ from typing import Any, Union
 from flask import Response, Blueprint
 
 from app.extensions import mongo
-from app.camera import deocode_image
+from app.image_decoding_utils import deocode_image
 from app.fill_databse import FillDatabase
 from app.mongo_controller import MongoController
 from app.faces_utils import check_persons, detect_faces
