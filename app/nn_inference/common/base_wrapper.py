@@ -1,5 +1,5 @@
 import json
-from typing import Dict, Any
+from typing import Dict, Any, Sequence
 from abc import ABC, abstractmethod
 
 from app.base_types import Image, BaseResult, List
@@ -19,7 +19,7 @@ class BaseWrapper(ABC):
         raise NotImplementedError
 
     @abstractmethod
-    def preprocess(self, image: Image) -> Image:
+    def preprocess(self, image: Sequence[Image]) -> Any:
         """
         Abstract method for image preprocessing
         for certain model/framework
