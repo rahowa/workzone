@@ -16,7 +16,7 @@ class BlazeFaceWrapper(BaseWrapper):
     Original implementation at https://github.com/hollance/BlazeFace-PyTorch
     """
 
-    def __init__(self, batch_size: int) -> None:
+    def __init__(self, batch_size: int = 2) -> None:
         current_dir = Path(__file__).parent
         base_path = current_dir.parent / "BlazeFace_PyTorch"
         self.anchors_path = base_path / "anchors.npy"
@@ -63,6 +63,6 @@ class BlazeFaceWrapper(BaseWrapper):
                 predictions.extend(self.model.predict_on_batch(batch))
             return list(map(lambda pred: FaceResult(pred[:, 16].tolist(),
                                                     pred[:, 0:4].tolist(),
-                                                    pred[:, 4:16].tolist()) \
-                                         if pred.shape[0] > 0 \
+                                                    pred[:, 4:16].tolist())
+                                         if pred.shape[0] > 0
                                          else FaceResult(), predictions))
