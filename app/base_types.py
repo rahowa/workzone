@@ -5,6 +5,7 @@ from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
 from typing import Tuple, Dict, Any, List
 
+from app.camera import encode_image
 
 Image = Array[np.uint8]
 Descriptor = Array[float]
@@ -107,4 +108,36 @@ class DetectionResult(BaseResult):
             "conf": self.conf,
             "boxes": self.boxes,
             "class_id": self.class_id
+        }
+
+
+
+@dataclass
+class SegmentationResult(BaseResult):
+    """
+    Result from semantic segmentation algotithm for one image
+
+    Parameters
+    ----------
+        mask: Arra[float]
+    """
+
+    mask: Array[float]
+
+    def to_dict(self, path: str) -> Dict[str, Any]:
+        """
+        Convert data to dict
+
+        Parameters
+        ----------
+            path: str
+                Path to analyzed image
+
+        Return
+        ------
+            result dict: Dict[str, str]
+                Dictionary prepared to serizlization
+        """
+        return {
+            "mask": encode_image((self.mask * 255).astype(np.uint8))
         }
