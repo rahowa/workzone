@@ -3,6 +3,7 @@ import sys
 import json
 import numpy as np
 from flask import g
+from typing import Dict, Any
 
 sys.path.append('../robot_work_zone_estimation/.')
 
@@ -11,7 +12,7 @@ from robot_work_zone_estimation.src.feat_extractor import MakeDescriptor
 from robot_work_zone_estimation.src.homography import ComputeHomography
 from robot_work_zone_estimation.src.utills import (projection_matrix,
                                                    render, draw_corner)
-from app.base_types import Dict, Any, Image
+from app.base_types import Image
 from app.nn_inference.faces.wrappers.face_recognition_lib_wrapper import FaceRecognitionLibWrapper
 from app.nn_inference.common.utils import draw_bboxes
 
