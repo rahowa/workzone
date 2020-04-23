@@ -1,10 +1,10 @@
 from flask import Flask
 from config import MainConfig
-from .extensions import mongo
+from app.extensions import mongo
 
-from .views import bp_main
+from app.views import bp_main
 # from .errors import bp_errors
-from .stream_views import bp_streams
+from app.stream_views import bp_streams
 
 
 def create_app(config=MainConfig):
