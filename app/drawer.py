@@ -1,3 +1,4 @@
+from os import rename
 import cv2
 import sys
 import json
@@ -10,7 +11,7 @@ sys.path.append('../robot_work_zone_estimation/.')
 from robot_work_zone_estimation.src.obj_loader import OBJ
 from robot_work_zone_estimation.src.feat_extractor import MakeDescriptor
 from robot_work_zone_estimation.src.homography import ComputeHomography
-from robot_work_zone_estimation.src.utills import (projection_matrix,
+from robot_work_zone_estimation.src.utills import (projection_matrix, compute_corner,
                                                    render, draw_corner)
 from app.base_types import Image
 from app.nn_inference.faces.wrappers.face_recognition_lib_wrapper import FaceRecognitionLibWrapper
@@ -78,14 +79,13 @@ class DrawZone:
 
     def __call__(self, scene: Image) -> Image:
         kp_marker, des_marker = self.column_descriptor.get_marker_data()
-        kp_scene, des_scene = self.column_descriptor.get_frame_data(scene)
+        kp_scene, des_scene = self.column_descriptor.get_frame_data(scene, None)
         if des_marker is not None and des_scene is not None:
             homography = self.homography_alg(kp_scene, kp_marker,
                                              des_scene, des_marker)
             if homography is not None:
-                scene = draw_corner(scene,
-                                    self.column_descriptor.get_marker_size(),
-                                    homography)
+                corner = compute_corner(self.column_descriptor.get_marker_size(), homography)
+                scene = draw_corner(scene, corner)
                 projection = projection_matrix(self.camera_params, homography)
                 scene = render(scene, self.obj_file,
                                self.scale_factor_model,
