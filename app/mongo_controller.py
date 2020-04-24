@@ -21,7 +21,7 @@ class MongoController:
             Name of table with workers
     """
 
-    def __init__(self, model: PyMongo, table: str=None):
+    def __init__(self, model: PyMongo, table: str = None):
         self.model = model
         if table is not None:
             self.table = getattr(model.db, table)
@@ -113,7 +113,6 @@ class MongoController:
             workers = self.table.find(condition)
         else:
             workers = self.table.find()
-            print(f"Num of workers is: {workers.count()}".center(79))
 
         descriptors = deque()
         for worker in workers:
@@ -140,6 +139,6 @@ class MongoController:
         descriptors = self.all_descriptors(condition)
         return tuple(filter(lambda x: not np.isnan(x).all(), descriptors))
 
-    def update_descriptor(self, worker: Any, descriptor: Descriptor) -> bool:
-        pass 
+    def clean(self) -> None:
+        self.table.drop()
 
