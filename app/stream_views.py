@@ -1,6 +1,7 @@
+from typing import Any, Optional
 from flask import Response, render_template, Blueprint
 
-from app.drawer import get_workzone_drawer, get_face_detection_drawer
+from app.drawer import get_workzone_drawer, get_face_detection_drawer, get_segmentation_drawer
 from app.camera import get_video_capture
 
 
@@ -24,12 +25,15 @@ def video_feed(operation: str) -> Response:
     ------
         Response with modified frame from camera
     """
+
     capture = get_video_capture(0)
-    drawer = None
+    drawer: Optional[Any] = None
     if operation == "ze":
         drawer = get_workzone_drawer("YOUR_CUSTOM_CONFIG.json")
     elif operation == "fd":
         drawer = get_face_detection_drawer()
+    elif operation == "seg":
+        drawer = get_segmentation_drawer()
     return Response(capture.gen_encoded_frame(drawer),
                     mimetype='multipart/x-mixed-replace; boundary=frame')
 
