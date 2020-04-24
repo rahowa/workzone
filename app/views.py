@@ -2,6 +2,7 @@ import jsonpickle
 from flask import request
 from typing import Any, Union
 from flask import Response, Blueprint
+import json
 
 from app.extensions import mongo
 from app.image_decoding_utils import deocode_image
@@ -33,13 +34,15 @@ def face_processing(target: str) -> Union[Response, Any]:
     if target == "recognize":
         db_controller = MongoController(mongo)  # TODO: cache results
         recognition_result = check_persons(image, db_controller)
-        response = {'faces_id': str(recognition_result)}
-        response = jsonpickle.encode(response)
+        response = {'faces_id': list(recognition_result)}
+        response = json.dumps(response)
+        # response = jsonpickle.encode(response)
         return Response(response, status=200, mimetype="application/json")
     elif target == "detect":
         face_locations = detect_faces(image)
-        response = {'faces_loc': str(face_locations)}
-        response = jsonpickle.encode(response)
+        response = {'faces_loc': list(face_locations)}
+        response = json.dumps(response)
+        # response = jsonpickle.encode(response)
         return Response(response, status=200, mimetype="application/json")
     else:
         return Response("empty", status=404)
@@ -69,7 +72,6 @@ def objects_processing(target: str) -> Response:
         return Response("Not available", status=404, mimetype="application/json")
 
 
-
 @bp_main.route("/workzone")
 def compute_workzone():
     pass
@@ -80,10 +82,13 @@ def fill_database() -> str:
     """
     Fill database with descriptors extracted from images
     """
+
     controller = MongoController(mongo)
-    face_det = FaceRecognitionLibWrapper("./nn_inference/configs/test_fr_hog_config.json")
+    config = {"model_type": "cnn", "number_of_times_to_upsample": 0}
+
+    face_det = FaceRecognitionLibWrapper(config)
     FillDatabase(controller, face_det)("./face_database")
-    return "Workers updated"
+    return "<p>Workers updated</p>"
 
 
 @bp_main.route('/classes/<target>')
