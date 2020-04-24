@@ -9,6 +9,7 @@ from app.fill_databse import FillDatabase
 from app.mongo_controller import MongoController
 from app.faces_utils import check_persons, detect_faces
 from app.nn_inference.faces.wrappers.face_recognition_lib_wrapper import FaceRecognitionLibWrapper
+from app.nn_inference.segmentation.wrappers.torchvision_segmentation_wrapper import TorchvisionSegmentationWrapper
 
 
 bp_main = Blueprint('blueprint_main', __name__)
@@ -29,7 +30,7 @@ def face_processing(target: str) -> Union[Response, Any]:
     """
     image = deocode_image(request.data)
     if target == "recognize":
-        db_controller = MongoController(mongo) #TODO: cache results
+        db_controller = MongoController(mongo)  # TODO: cache results
         recognition_result = check_persons(image, db_controller)
         response = {'faces_id': str(recognition_result)}
         response = jsonpickle.encode(response)
@@ -56,7 +57,15 @@ def objects_processing(target: str) -> Response:
     ------
         Response with target result
     """
-    pass
+    image = deocode_image(request.data)
+    if target == "segmentation":
+        wrapper = TorchvisionSegmentationWrapper()
+        res = wrapper.predict((image,))[0]
+        response = {'mask': res.to_dict(f"/object/{target}")}
+        response = jsonpickle.encode(response)
+        return Response(response, status=200, mimetype="application/json")
+    else:
+        return Response("Not available", status=404, mimetype="application/json")
 
 
 @bp_main.route("/fill_db")
