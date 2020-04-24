@@ -21,7 +21,7 @@ class BaseWrapper(ABC):
         raise NotImplementedError
 
     @abstractmethod
-    def preprocess(self, image: Sequence[Image]) -> Any:
+    def preprocess(self, image: Image) -> Any:
         """
         Abstract method for image preprocessing
         for certain model/framework
@@ -48,4 +48,7 @@ class BaseWrapper(ABC):
         return config
 
     def load(self):
+        pass
+
+    def unload(self):
         pass
