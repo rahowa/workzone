@@ -44,6 +44,9 @@ class BlazeFaceWrapper(BaseWrapper):
             print("Loading weight and anchors failed", e)
             return False
 
+    def unload(self) -> None:
+        self.model.to("cpu")
+
     def preprocess(self, images: Sequence[Image]) -> Iterator[Image]:
         return (cv2.cvtColor(image, cv2.COLOR_BGR2RGB) for image in images)
 
