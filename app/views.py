@@ -7,6 +7,7 @@ from app.extensions import mongo
 from app.image_decoding_utils import deocode_image
 from app.fill_databse import FillDatabase
 from app.mongo_controller import MongoController
+from app.route_utils import load_classes
 from app.faces_utils import check_persons, detect_faces
 from app.nn_inference.faces.wrappers.face_recognition_lib_wrapper import FaceRecognitionLibWrapper
 from app.nn_inference.segmentation.wrappers.torchvision_segmentation_wrapper import TorchvisionSegmentationWrapper
@@ -68,6 +69,12 @@ def objects_processing(target: str) -> Response:
         return Response("Not available", status=404, mimetype="application/json")
 
 
+
+@bp_main.route("/workzone")
+def compute_workzone():
+    pass
+
+
 @bp_main.route("/fill_db")
 def fill_database() -> str:
     """
@@ -79,14 +86,15 @@ def fill_database() -> str:
     return "Workers updated"
 
 
-@bp_main.route('/classes')
-def get_availabel_classes() -> Response:
+@bp_main.route('/classes/<target>')
+def get_availabel_classes(target: str) -> Response:
     """
     Return Json with all available object detection and segmentation classes
     """
-    with open("classes.txt") as cls_file:
-        classes = cls_file.read().splitlines()
-    response = {"total": len(classes),
-                "classes": classes}
-    response = jsonpickle.encode(response)
-    return Response(response, status=200, mimetype="application/json")
+
+    if target == "all":
+        return load_classes("classes.txt")
+    elif target == "segmentation":
+        return load_classes("segmentation_classes.txt")
+    else:
+        return Response("WRONG TARGET")
