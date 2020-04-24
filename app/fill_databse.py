@@ -37,7 +37,7 @@ class FillDatabase:
             for face_path in persons_faces:
                 face_image = cv2.imread(os.path.join(path_to_person_faces, face_path))
                 face_image = cv2.cvtColor(face_image, cv2.COLOR_BGR2RGB)
-                face_image = self.fr_module.preprocess_image(face_image)
+                face_image = self.fr_module.preprocess(face_image)
                 face_bounding_boxes = self.fr_module.get_locations(face_image)
 
                 if len(face_bounding_boxes) != 1:
@@ -51,6 +51,7 @@ class FillDatabase:
             self.persons_encodings.update({person: person_encoding})
 
     def fill_database(self):
+        self.db_controller.clean()
         for person, encoding in self.persons_encodings.items():
             if self.db_controller.add_worker({"name": person,
                                               "encoding": encoding}):
