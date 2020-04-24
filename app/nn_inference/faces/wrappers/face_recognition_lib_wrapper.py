@@ -149,3 +149,10 @@ class FaceRecognitionLibWrapper(BaseWrapper):
                 List of bools where True when sample mathch with descriptor
         """
         return fr.compare_faces(sample, descriptors) 
+
+
+    def load(self) -> bool:
+        return True
+    
+    def unload(self) -> None:
+        pass
