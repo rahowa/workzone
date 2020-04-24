@@ -131,7 +131,7 @@ class FaceRecognitionLibWrapper(BaseWrapper):
         face_encodings = self.get_encodings(data, face_locations)
         return FaceResult(list(), face_locations, list(), list(face_encodings))
 
-    def match(self, sample: Descriptor, descriptors: Descriptors) -> List[bool]:
+    def match(self, descriptors: Descriptors, sample: Descriptor) -> List[bool]:
         """
         Compute similarity between descriptors and provided sample (also descriptor)
 
@@ -148,7 +148,7 @@ class FaceRecognitionLibWrapper(BaseWrapper):
             matches:
                 List of bools where True when sample mathch with descriptor
         """
-        return fr.compare_faces(sample, descriptors) 
+        return fr.compare_faces(descriptors, sample, tolerance=0.55) 
 
 
     def load(self) -> bool:
