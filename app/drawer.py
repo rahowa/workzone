@@ -1,3 +1,4 @@
+from app.nn_inference.common.base_wrapper import BaseWrapper
 from os import rename
 import cv2
 import sys
@@ -15,7 +16,8 @@ from robot_work_zone_estimation.src.utills import (projection_matrix, compute_co
                                                    render, draw_corner)
 from app.base_types import Image
 from app.nn_inference.faces.wrappers.face_recognition_lib_wrapper import FaceRecognitionLibWrapper
-from app.nn_inference.common.utils import draw_bboxes
+from app.nn_inference.common.utils import draw_bboxes, decode_segmap
+from app.nn_inference.segmentation.wrappers.torchvision_segmentation_wrapper import TorchvisionSegmentationWrapper
 
 
 def read_json(path: str) -> Dict[str, Any]:
@@ -34,7 +36,13 @@ class DrawObjectDetection:
 
 
 class DrawSegmentation:
-    pass
+    def __init__(self, detector: TorchvisionSegmentationWrapper) -> None:
+        self.detector = detector
+    
+    def __call__(self, scene: Image) -> Image:
+        det_result = self.detector.predict(scene)[0].mask
+        scene = decode_segmap(det_result)
+        return scene
 
 
 class DrawFaceDetection:
@@ -107,4 +115,10 @@ def get_face_detection_drawer() -> DrawFaceDetection:
     drawer = getattr(g, "_face_det_drawer", None)
     if drawer is None:
         drawer = g._face_det_drawer = DrawFaceDetection(FaceRecognitionLibWrapper(config))
+    return drawer
+
+def get_segmentation_drawer() -> DrawSegmentation:
+    drawer = getattr(g, "_segmentation_drawer", None)
+    if drawer is None:
+        drawer = g._face_det_drawer = DrawSegmentation(TorchvisionSegmentationWrapper())
     return drawer
