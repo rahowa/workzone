@@ -1,3 +1,4 @@
+from os import stat
 import typer
 from typing import Sequence, Union, List, Optional
 from app.nn_inference.common.base_wrapper import BaseWrapper
@@ -23,9 +24,11 @@ class NetworkContext:
 
     @model.setter
     def model(self, new_model: BaseWrapper) -> None:
-        typer.echo(f"Loading [{new_model}]")
+        self._model.unload()
         self._model = new_model
         status = self._model.load()
+        if not status:
+            raise ValueError
 
     def predict(self, image: Union[Image, Sequence[Image]]) -> List[BaseResult]:
         if self._model is not None:
