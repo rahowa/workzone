@@ -1,7 +1,9 @@
 from typing import Any, Optional
 from flask import Response, render_template, Blueprint
 
-from app.drawer import get_workzone_drawer, get_face_detection_drawer, get_segmentation_drawer, get_object_detection_drawer
+from app.drawer import (get_keypoints_drawer, get_workzone_drawer, 
+                        get_face_detection_drawer, get_segmentation_drawer,
+                        get_object_detection_drawer)
 from app.camera import get_video_capture
 
 
@@ -21,6 +23,7 @@ def video_feed(operation: str) -> Response:
             seg - segmentation;
             fd  - face detection;
             fr  - face recognition;
+            kp  - keypoint detection
     Return
     ------
         Response with modified frame from camera
@@ -36,6 +39,8 @@ def video_feed(operation: str) -> Response:
         drawer = get_segmentation_drawer()
     elif operation == "od":
         drawer = get_object_detection_drawer()
+    elif operation == "kp":
+        drawer = get_keypoints_drawer()
     return Response(capture.gen_encoded_frame(drawer),
                     mimetype='multipart/x-mixed-replace; boundary=frame')
 
