@@ -16,6 +16,7 @@ from robot_work_zone_estimation.src.utills import (projection_matrix, compute_co
                                                    render, draw_corner)
 from app.base_types import Image
 from app.nn_inference.faces.wrappers.face_recognition_lib_wrapper import FaceRecognitionLibWrapper
+from app.nn_inference.detection.wrappers.detection_wrapper import YOLOWrapper
 from app.nn_inference.common.utils import draw_bboxes, decode_segmap
 from app.nn_inference.segmentation.wrappers.torchvision_segmentation_wrapper import TorchvisionSegmentationWrapper
 
@@ -32,7 +33,15 @@ class DrawRecognition:
 
 
 class DrawObjectDetection:
-    pass
+    def __init__(self, detector: YOLOWrapper) -> None:
+        self.detector = detector
+        self.detector.load()
+
+    def __call__(self, scene: Image) -> Image:
+        det_result = self.detector.predict(scene)
+        bboxes = [det.boxes for det in det_result if det.boxes != ()]
+        scene = draw_bboxes(scene, bboxes)
+        return scene
 
 
 class DrawSegmentation:
@@ -117,8 +126,16 @@ def get_face_detection_drawer() -> DrawFaceDetection:
         drawer = g._face_det_drawer = DrawFaceDetection(FaceRecognitionLibWrapper(config))
     return drawer
 
+
 def get_segmentation_drawer() -> DrawSegmentation:
     drawer = getattr(g, "_segmentation_drawer", None)
     if drawer is None:
         drawer = g._face_det_drawer = DrawSegmentation(TorchvisionSegmentationWrapper())
+    return drawer
+
+
+def get_object_detection_drawer() -> DrawObjectDetection:
+    drawer = getattr(g, "_obj_det_drawer", None)
+    if drawer is None:
+        drawer = g._obj_det_drawer = DrawObjectDetection(YOLOWrapper())
     return drawer
