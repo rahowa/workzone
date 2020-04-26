@@ -17,8 +17,9 @@ from robot_work_zone_estimation.src.utills import (projection_matrix, compute_co
 from app.base_types import Image
 from app.nn_inference.faces.wrappers.face_recognition_lib_wrapper import FaceRecognitionLibWrapper
 from app.nn_inference.detection.wrappers.detection_wrapper import YOLOWrapper
-from app.nn_inference.common.utils import draw_bboxes, decode_segmap
+from app.nn_inference.common.utils import draw_bboxes, decode_segmap, draw_keypoints
 from app.nn_inference.segmentation.wrappers.torchvision_segmentation_wrapper import TorchvisionSegmentationWrapper
+from app.nn_inference.keypoints.wrappers.torchvision_keypoints_wrapper import TorchvisionKeypointsWrapper
 
 
 def read_json(path: str) -> Dict[str, Any]:
@@ -27,9 +28,17 @@ def read_json(path: str) -> Dict[str, Any]:
     return file
 
 
-#TODO: implement classes
-class DrawRecognition:
-    pass
+class DrawKeypoints:
+    def __init__(self, detector: TorchvisionKeypointsWrapper) -> None:
+        self.detector = detector
+    
+    def __call__(self, scene: Image) -> Image:
+        det_result = self.detector.predict(scene)[0]
+        boxes = det_result.boxes
+        keypoints = det_result.keypoints
+        scene = draw_keypoints(scene, keypoints)
+        scene = draw_bboxes(scene, boxes)
+        return scene
 
 
 class DrawObjectDetection:
@@ -120,7 +129,7 @@ def get_workzone_drawer(config_path: str) -> DrawZone:
 
 
 def get_face_detection_drawer() -> DrawFaceDetection:
-    config = {"model_type": "hog", "number_of_times_to_upsample": 1}
+    config = {"model_type": "cnn", "number_of_times_to_upsample": 0}
     drawer = getattr(g, "_face_det_drawer", None)
     if drawer is None:
         drawer = g._face_det_drawer = DrawFaceDetection(FaceRecognitionLibWrapper(config))
@@ -138,4 +147,11 @@ def get_object_detection_drawer() -> DrawObjectDetection:
     drawer = getattr(g, "_obj_det_drawer", None)
     if drawer is None:
         drawer = g._obj_det_drawer = DrawObjectDetection(YOLOWrapper())
+    return drawer
+
+
+def get_keypoints_drawer() -> DrawKeypoints:
+    drawer = getattr(g, "_keypoints_drawer", None)
+    if drawer is None:
+        drawer = g._face_det_drawer = DrawKeypoints(TorchvisionKeypointsWrapper())
     return drawer
