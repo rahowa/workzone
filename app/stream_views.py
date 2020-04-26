@@ -32,7 +32,7 @@ def video_feed(operation: str) -> Response:
     capture = get_video_capture(0)
     drawer: Optional[Any] = None
     if operation == "ze":
-        drawer = get_workzone_drawer("YOUR_CUSTOM_CONFIG.json")
+        drawer = get_workzone_drawer()
     elif operation == "fd":
         drawer = get_face_detection_drawer()
     elif operation == "seg":
