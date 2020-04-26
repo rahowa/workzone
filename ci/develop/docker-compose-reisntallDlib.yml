@@ -3,6 +3,7 @@ services:
   flask:
     build:
       context: ../../.
+      dockerfile: Dockerfile-reinstallDlib
     privileged: true
     ports:
       - 1000:1000
