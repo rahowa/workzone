@@ -12,7 +12,7 @@ from app.nn_inference.common.utils import draw_bboxes
 """
 
 
-operation = "recognize"
+operation = "detect"
 addr = 'http://0.0.0.0:1000'
 test_url = addr + f'/face/{operation}'
 path_to_test_image = "./test_image.jpg"
@@ -25,7 +25,7 @@ if __name__ == "__main__":
     cap = cv2.VideoCapture(0)
     cap.set(3, 640)
     cap.set(4, 480)
-    while True:
+    while True: 
         # time.sleep(1)
         _, frame = cap.read()
         _, image_to_send = cv2.imencode('.jpg', frame)
