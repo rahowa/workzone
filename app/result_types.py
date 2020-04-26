@@ -1,3 +1,4 @@
+from app.nn_inference import keypoints
 import os
 import numpy as np
 from nptyping import Array
@@ -5,7 +6,7 @@ from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
 from typing import Dict, Any, List
 
-from app.base_types import Boxes
+from app.base_types import Box, Boxes
 from app.image_decoding_utils import encode_image
 
 
@@ -106,7 +107,6 @@ class DetectionResult(BaseResult):
         }
 
 
-
 @dataclass
 class SegmentationResult(BaseResult):
     """
@@ -135,4 +135,41 @@ class SegmentationResult(BaseResult):
         """
         return {
             "mask": encode_image((self.mask * 255).astype(np.uint8))
+        }
+
+
+@dataclass
+class KeypointsResult(BaseResult):
+    """
+    Result from human pose estimation algotithm for one image
+
+    Parameters
+    ----------
+        boxes: Boxes
+            Bounding boxes of detected persons in [xmin, ymin, xmax, ymax] format
+
+        keypoints: Array[float]
+            Keypoints of human body if format [[x, y], [x, y], ...]
+    """
+
+    boxes: Boxes
+    keypoints: Array[float]
+
+    def to_dict(self, path: str) -> Dict[str, Any]:
+        """
+        Convert data to dict
+
+        Parameters
+        ----------
+            path: str
+                Path to analyzed image
+
+        Return
+        ------
+            result dict: Dict[str, str]
+                Dictionary prepared to serizlization
+        """
+        return {
+            "boxes": self.boxes,
+            "keypoints": self.keypoints.tolist()
         }
