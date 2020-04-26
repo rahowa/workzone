@@ -1,3 +1,6 @@
 [submodule "robot_work_zone_estimation"]
 	path = robot_work_zone_estimation
 	url = https://github.com/rahowa/robot_work_zone_estimation.git
+[submodule "app/nn_inference/detection/yolo_v3"]
+	path = app/nn_inference/detection/yolo_v3
+	url = https://github.com/eriklindernoren/PyTorch-YOLOv3.git
