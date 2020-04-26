@@ -1,4 +1,5 @@
 import torch
+import numpy as np
 import torchvision
 from typing import Sequence, List
 
@@ -11,6 +12,11 @@ class TorchvisionKeypointsWrapper(BaseWrapper):
     def __init__(self) -> None:
         self.model = torchvision.models.detection.keypointrcnn_resnet50_fpn(pretrained=True)
         self.device = "cuda" if torch.cuda.is_available() else "cpu"
+        self.x_inp_ratio = 800/640
+        self.y_inp_ration = 800/480
+        self.kp_result_normalizatoin = np.array([self.x_inp_ratio, self.y_inp_ration, 1.0]).reshape(1, 1, 3)
+        self.box_result_normalization = np.array([self.x_inp_ratio, self.y_inp_ration,
+                                                  self.x_inp_ratio, self.y_inp_ration]).reshape(1, 4)
 
     def __repr__(self):
         return f"DeeplabV3 (ResNet50) model on {self.device}"
@@ -29,12 +35,13 @@ class TorchvisionKeypointsWrapper(BaseWrapper):
     def preprocess(self, images: Sequence[Image]) -> torch.Tensor:
         mean = [0.485, 0.456, 0.406]
         std = [0.229, 0.224, 0.225]
+
+        
+
         preprocessing = torchvision.transforms.Compose([
             torchvision.transforms.ToPILImage(),    
-            torchvision.transforms.Resize((320, 240)),
-            torchvision.transforms.CenterCrop(224),
+            torchvision.transforms.Resize((int(self.x_inp_ratio * 640), int(self.y_inp_ration * 480))),
             torchvision.transforms.ToTensor(),
-            torchvision.transforms.Normalize(mean, std),
         ])
         return preprocessing(images)
 
@@ -44,12 +51,12 @@ class TorchvisionKeypointsWrapper(BaseWrapper):
         with torch.no_grad():
             if len(ready_images.shape) == 3:
                 predictions = self.model(ready_images.unsqueeze(0))[0]
-                boxes = predictions["boxes"]
-                keypoints = predictions["keypoints"]
+                boxes = predictions["boxes"] / self.box_result_normalization
+                keypoints = predictions["keypoints"] / self.kp_result_normalizatoin
                 return [KeypointsResult(boxes, keypoints)]
             else:   
                 predictions = self.model(ready_images.unsqueeze(0))
-                boxes = [image_pred["boxes"] for image_pred in predictions]
-                keypoints = [image_pred["keypoints"] for image_pred in predictions]
+                boxes = [image_pred["boxes"] / self.box_result_normalization for image_pred in predictions]
+                keypoints = [image_pred["keypoints"] / self.kp_result_normalizatoin for image_pred in predictions]
                 return [KeypointsResult(img_boxes, img_keypoints)
                         for img_boxes, img_keypoints in zip(boxes, keypoints)]
