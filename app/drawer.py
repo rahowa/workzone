@@ -9,11 +9,10 @@ from typing import Dict, Any
 
 sys.path.append('../robot_work_zone_estimation/.')
 
-from robot_work_zone_estimation.src.obj_loader import OBJ
-from robot_work_zone_estimation.src.feat_extractor import MakeDescriptor
-from robot_work_zone_estimation.src.homography import ComputeHomography
-from robot_work_zone_estimation.src.utills import (projection_matrix, compute_corner,
-                                                   render, draw_corner)
+
+from robot_work_zone_estimation.src.aruco_zone_estimation import ArucoZoneEstimator, ARUCO_MARKER_SIZE
+from robot_work_zone_estimation.src.calibrate_camera import CameraParams
+
 from app.base_types import Image
 from app.nn_inference.faces.wrappers.face_recognition_lib_wrapper import FaceRecognitionLibWrapper
 from app.nn_inference.detection.wrappers.detection_wrapper import YOLOWrapper
@@ -73,58 +72,32 @@ class DrawFaceDetection:
         return scene
 
 
-class DrawZone:
-    """
-    """
+class DrawArucoZone:
     def __init__(self, config_path: str) -> None:
         self.config_path = config_path
         self.config = read_json(config_path)
 
-        self.obj_file: OBJ = OBJ(self.config['path_to_obj'], swapyz=True)
-        self.marker_path = self.config['path_to_marker']
-        
-        focal_lenght = self.config['focal_lenght']
-        frame_width = self.config['frame_width']
-        frame_height = self.config['frame_height']
-        max_num_of_features = self.config['max_num_of_features']
-        scale_factor_feat_det = self.config['scale_factor_feat_det']
-        num_of_levels = self.config['num_of_levels']
-        self.scale_factor_model = self.config['scale_factor_model']
-
-        self.descriptor_params = dict(nfeatures=max_num_of_features,
-                                      scaleFactor=scale_factor_feat_det, 
-                                      nlevels=num_of_levels, 
-                                      edgeThreshold=10, firstLevel=0)
-        self.camera_params = np.array([[focal_lenght , 0,            frame_width//2], 
-                                       [0,             focal_lenght, frame_height//2], 
-                                       [0,             0,            1]])
-        self.column_descriptor = MakeDescriptor(cv2.ORB_create(**self.descriptor_params), 
-                                                self.marker_path, 200, 200)
-        self.homography_alg = ComputeHomography(cv2.BFMatcher_create(cv2.NORM_HAMMING, 
-                                                crossCheck=True))
+        marker_world_size = self.config["marker_world_size"]
+        marker_size = ARUCO_MARKER_SIZE[self.config["marker_size"]]
+        camera_params_dict = self.config["camera_params"]
+        camera_params = CameraParams(np.array(camera_params_dict["camera_mtx"]),
+                                     np.array(camera_params_dict["distortion_vec"]),
+                                     np.array(camera_params_dict["rotation_vec"]),
+                                     np.array(camera_params_dict["translation_vec"]))
+        self.estimator = ArucoZoneEstimator(marker_world_size, 
+                                            marker_size, 
+                                            camera_params)
+        print("INITED".center(80))
 
     def __call__(self, scene: Image) -> Image:
-        kp_marker, des_marker = self.column_descriptor.get_marker_data()
-        kp_scene, des_scene = self.column_descriptor.get_frame_data(scene, None)
-        if des_marker is not None and des_scene is not None:
-            homography = self.homography_alg(kp_scene, kp_marker,
-                                             des_scene, des_marker)
-            if homography is not None:
-                corner = compute_corner(self.column_descriptor.get_marker_size(), homography)
-                scene = draw_corner(scene, corner)
-                projection = projection_matrix(self.camera_params, homography)
-                scene = render(scene, self.obj_file,
-                               self.scale_factor_model,
-                               projection,
-                               self.column_descriptor.get_marker_size(),
-                               False)
-        return scene
+        return self.estimator.estimate(scene, None)
 
 
-def get_workzone_drawer(config_path: str) -> DrawZone:
+def get_workzone_drawer() -> DrawArucoZone:
+    config_path = "../robot_work_zone_estimation/aruco_config.json"
     drawer = getattr(g, "_zone_drawer", None)
     if drawer is None:
-        drawer = g._zone_drawer = DrawZone(config_path)
+        drawer = g._zone_drawer = DrawArucoZone(config_path)
     return drawer
 
 
