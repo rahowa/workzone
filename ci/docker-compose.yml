@@ -1,0 +1,17 @@
+version: '3'
+services:
+  flask:
+    image: rbakanouski/app:3.0
+    privileged: true
+    ports:
+      - 1000:1000
+    volumes:
+      - /dev/video0:/dev/video0
+    environment:
+      - MONGO_URI=mongodb://localhost:27017/workers
+      - MONGO_DBNAME=workers
+      - SECRET_KEY=228_YA_R0B0T_EBAL_VSEH_V_ROT_1488_v0.001
+  mongo:
+    image: mongo:latest
+    ports:
+      - 27017:27017

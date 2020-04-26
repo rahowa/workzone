@@ -1,0 +1,9 @@
+FROM rbakanouski/flask:1.3
+
+RUN pip uninstall --yes dlib; pip install dlib;
+
+WORKDIR /workzone
+
+COPY . .
+
+CMD [ "python3", "run.py" ]

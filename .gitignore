@@ -106,3 +106,5 @@ venv.bak/
 
 # custom_database
 face_database/
+
+Dockerfile
