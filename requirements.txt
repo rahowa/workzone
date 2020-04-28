@@ -1,0 +1,15 @@
+# This file may be used to create an environment using:
+# $ conda create --name <env> --file <this file>
+# platform: osx-64
+
+flask
+dlib
+numpy
+flask_pymongo
+dataclasses
+opencv
+jsonpickle
+nptyping
+cmake
+face_recognition
+requests
