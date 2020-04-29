@@ -15,6 +15,7 @@ from app.faces_utils import check_persons, detect_faces
 from app.nn_inference.detection.wrappers.detection_wrapper import YOLOWrapper
 from app.nn_inference.faces.wrappers.face_recognition_lib_wrapper import FaceRecognitionLibWrapper
 from app.nn_inference.segmentation.wrappers.torchvision_segmentation_wrapper import TorchvisionSegmentationWrapper
+from app.nn_inference.keypoints.wrappers.torchvision_keypoints_wrapper import TorchvisionKeypointsWrapper
 from robot_work_zone_estimation.src.aruco_zone_estimation import ArucoZoneEstimator, ARUCO_MARKER_SIZE
 from robot_work_zone_estimation.src.workzone import Workzone
 from robot_work_zone_estimation.src.calibrate_camera import CameraParams
@@ -64,6 +65,8 @@ def objects_processing(target: str) -> Response:
         target: str
             'segmentation' for semantic segmentation. Return response with RLE masks.
             'detection' for object detection. Return response with detected boxes and classes.
+            'keypoints' for human keypoints detection. Return responce with [x, y] coordinates
+            of each keypoint.
     Return
     ------
         Response with target result
@@ -77,11 +80,18 @@ def objects_processing(target: str) -> Response:
         response = {'mask': res.to_dict(f"/object/{target}")}
         response = json.dumps(response)
         return Response(response, status=200, mimetype="application/json")
-    else:
-        detector = YOLOWrapper()
-        detector.load()
-        res = detector.predict((image,))[0]
+    elif target == "detection":
+        wrapper = YOLOWrapper()
+        wrapper.load()
+        res = wrapper.predict((image,))[0]
         response = {'boxes': res.to_dict(f"/object/{target}")}
+        response = json.dumps(response)
+        return Response(response, status=200, mimetype="application/json")
+    else:
+        wrapper = TorchvisionKeypointsWrapper()
+        wrapper.load()
+        res = wrapper.predict(image)[0]
+        response = {"keypoints": res.to_dict(f"/object/{target}")}
         response = json.dumps(response)
         return Response(response, status=200, mimetype="application/json")
 
