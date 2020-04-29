@@ -33,11 +33,6 @@ class TorchvisionKeypointsWrapper(BaseWrapper):
         self.model.to("cpu")
     
     def preprocess(self, images: Sequence[Image]) -> torch.Tensor:
-        mean = [0.485, 0.456, 0.406]
-        std = [0.229, 0.224, 0.225]
-
-        
-
         preprocessing = torchvision.transforms.Compose([
             torchvision.transforms.ToPILImage(),    
             torchvision.transforms.Resize((int(self.x_inp_ratio * 640), int(self.y_inp_ration * 480))),
@@ -51,12 +46,14 @@ class TorchvisionKeypointsWrapper(BaseWrapper):
         with torch.no_grad():
             if len(ready_images.shape) == 3:
                 predictions = self.model(ready_images.unsqueeze(0))[0]
-                boxes = predictions["boxes"] / self.box_result_normalization
-                keypoints = predictions["keypoints"] / self.kp_result_normalizatoin
-                return [KeypointsResult(boxes, keypoints)]
+                boxes = predictions["boxes"].cpu().numpy() / self.box_result_normalization
+                keypoints = predictions["keypoints"].cpu().numpy() / self.kp_result_normalizatoin
+                return [KeypointsResult(boxes.tolist(), keypoints)]
             else:   
-                predictions = self.model(ready_images.unsqueeze(0))
-                boxes = [image_pred["boxes"] / self.box_result_normalization for image_pred in predictions]
-                keypoints = [image_pred["keypoints"] / self.kp_result_normalizatoin for image_pred in predictions]
-                return [KeypointsResult(img_boxes, img_keypoints)
+                predictions = self.model(ready_images.unsqueeze(0)).cpu().numpy()
+                boxes = [image_pred["boxes"].cpu().numpy() / self.box_result_normalization
+                         for image_pred in predictions]
+                keypoints = [image_pred["keypoints"].cpu().numpy() / self.kp_result_normalizatoin
+                             for image_pred in predictions]
+                return [KeypointsResult(img_boxes.tolist(), img_keypoints)
                         for img_boxes, img_keypoints in zip(boxes, keypoints)]
