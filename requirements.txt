@@ -13,3 +13,6 @@ nptyping
 cmake
 face_recognition
 requests
+aiohttp[speedups]
+torch
+torchvision
