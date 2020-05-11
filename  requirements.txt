@@ -1,0 +1,10 @@
+flask
+python-dotenv
+flask_pymongo
+dataclasses
+opencv-python
+jsonpickle
+nptyping
+cmake
+face_recognition
+requests
