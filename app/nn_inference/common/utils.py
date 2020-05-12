@@ -1,6 +1,7 @@
+from app.nn_inference import keypoints
 import cv2
 import numpy as np
-from typing import List, Any
+from typing import List, Any, Tuple
 from app.base_types import Image, Boxes
 
 
@@ -56,3 +57,13 @@ def decode_segmap(image, nc=21):
     print(image.shape, r.shape, g.shape, b.shape)
     rgb = np.stack([r, g, b], axis=-1)
     return rgb
+
+
+def draw_keypoints(image: Image, keypoints: List[List[Tuple[float, float, float]]]) -> Image:
+    color = (255//2, 255//2, 0)
+    for person in keypoints:
+        for kp in person:
+            if kp[2]:
+                center = (int(kp[0]), int(kp[1]))
+                image = cv2.circle(image, center, 4, color, 2)
+    return image
