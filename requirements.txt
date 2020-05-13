@@ -8,3 +8,7 @@ nptyping
 cmake
 face_recognition
 requests
+tqdm
+matplotlib
+frozendict
+opencv-contrib-python
