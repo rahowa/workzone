@@ -1,0 +1,23 @@
+version: '3'
+services: 
+    flask:
+        build: .
+        image: diplom/flask
+        privileged: true
+        devices: 
+            - /dev/video0:/dev/video0
+        volumes: 
+            - ./logs:/var/log
+        ports:
+            - 1000:1000
+        environment: 
+            - MONGO_URI=mongodb://localhost:27017/workers
+            - MONGO_DBNAME=workers
+            - SECRET_KEY=228_YA_R0B0T_EBAL_VSEH_V_ROT_1488_v0.001
+    mongo:
+        image: mongo:latest
+        ports:
+            - 27017:27017
+        volumes: 
+            - ./mongo_data:/data/db
+        

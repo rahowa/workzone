@@ -108,3 +108,7 @@ venv.bak/
 face_database/
 
 Dockerfile
+
+mongo_data
+# flask logs
+logs
