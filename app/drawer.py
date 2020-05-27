@@ -14,6 +14,7 @@ from robot_work_zone_estimation.src.calibrate_camera_utils import CameraParams
 from robot_work_zone_estimation.src.aruco_zone_estimation import ArucoZoneEstimator, ARUCO_MARKER_SIZE
 
 from app.base_types import Image
+from app.extensions import cache
 from app.nn_inference.detection.wrappers.detection_wrapper import YOLOWrapper
 from app.nn_inference.common.utils import draw_bboxes, decode_segmap, draw_keypoints
 from app.nn_inference.faces.wrappers.face_recognition_lib_wrapper import FaceRecognitionLibWrapper
@@ -105,38 +106,48 @@ class DrawArucoZone:
         return scene
 
 
+@cache.cached(100)
 def get_workzone_drawer() -> DrawArucoZone:
     config_path = "../robot_work_zone_estimation/aruco_config.json"
-    drawer = getattr(g, "_zone_drawer", None)
+    drawer = cache.get("workzone_drawer")
     if drawer is None:
-        drawer = g._zone_drawer = DrawArucoZone(config_path)
+        drawer = DrawArucoZone(config_path)
+        cache.set("workzone_drawer", drawer)
     return drawer
 
 
+@cache.cached(100)
 def get_face_detection_drawer() -> DrawFaceDetection:
     config = {"model_type": "cnn", "number_of_times_to_upsample": 0}
-    drawer = getattr(g, "_face_det_drawer", None)
+    drawer = cache.get("face_det_drawer")
     if drawer is None:
-        drawer = g._face_det_drawer = DrawFaceDetection(FaceRecognitionLibWrapper(config))
+        drawer = DrawFaceDetection(FaceRecognitionLibWrapper(config))
+        cache.set("face_det_drawer", drawer)
     return drawer
 
 
+@cache.cached(100)
 def get_segmentation_drawer() -> DrawSegmentation:
-    drawer = getattr(g, "_segmentation_drawer", None)
+    drawer = cache.get("segmentation_drawer")
     if drawer is None:
-        drawer = g._face_det_drawer = DrawSegmentation(TorchvisionSegmentationWrapper())
+        drawer = DrawSegmentation(TorchvisionSegmentationWrapper())
+        cache.set("segmentation_drawer", DrawSegmentation(TorchvisionSegmentationWrapper()))
     return drawer
 
 
+@cache.cached(100)
 def get_object_detection_drawer() -> DrawObjectDetection:
-    drawer = getattr(g, "_obj_det_drawer", None)
+    drawer = cache.get("obj_det_drawer")
     if drawer is None:
-        drawer = g._obj_det_drawer = DrawObjectDetection(YOLOWrapper())
+        drawer = DrawObjectDetection(YOLOWrapper())
+        cache.set("obj_det_drawer", drawer)
     return drawer
 
 
+@cache.cached(100)
 def get_keypoints_drawer() -> DrawKeypoints:
-    drawer = getattr(g, "_keypoints_drawer", None)
+    drawer = cache.get("keypoints_drawer")
     if drawer is None:
-        drawer = g._face_det_drawer = DrawKeypoints(TorchvisionKeypointsWrapper())
+        drawer = DrawKeypoints(TorchvisionKeypointsWrapper())
+        cache.set("keypoints_drawer", drawer)
     return drawer
