@@ -9,16 +9,16 @@ from typing import Dict, Any
 
 sys.path.append('../robot_work_zone_estimation/.')
 
-
+from robot_work_zone_estimation.src.workzone import Workzone
+from robot_work_zone_estimation.src.calibrate_camera_utils import CameraParams
 from robot_work_zone_estimation.src.aruco_zone_estimation import ArucoZoneEstimator, ARUCO_MARKER_SIZE
-from robot_work_zone_estimation.src.calibrate_camera import CameraParams
 
 from app.base_types import Image
-from app.nn_inference.faces.wrappers.face_recognition_lib_wrapper import FaceRecognitionLibWrapper
 from app.nn_inference.detection.wrappers.detection_wrapper import YOLOWrapper
 from app.nn_inference.common.utils import draw_bboxes, decode_segmap, draw_keypoints
-from app.nn_inference.segmentation.wrappers.torchvision_segmentation_wrapper import TorchvisionSegmentationWrapper
+from app.nn_inference.faces.wrappers.face_recognition_lib_wrapper import FaceRecognitionLibWrapper
 from app.nn_inference.keypoints.wrappers.torchvision_keypoints_wrapper import TorchvisionKeypointsWrapper
+from app.nn_inference.segmentation.wrappers.torchvision_segmentation_wrapper import TorchvisionSegmentationWrapper
 
 
 def read_json(path: str) -> Dict[str, Any]:
@@ -30,7 +30,7 @@ def read_json(path: str) -> Dict[str, Any]:
 class DrawKeypoints:
     def __init__(self, detector: TorchvisionKeypointsWrapper) -> None:
         self.detector = detector
-    
+
     def __call__(self, scene: Image) -> Image:
         det_result = self.detector.predict(scene)[0]
         boxes = det_result.boxes
@@ -55,9 +55,9 @@ class DrawObjectDetection:
 class DrawSegmentation:
     def __init__(self, detector: TorchvisionSegmentationWrapper) -> None:
         self.detector = detector
-    
+
     def __call__(self, scene: Image) -> Image:
-        det_result = self.detector.predict(scene)[0].mask
+        det_result = self.detector.predict((scene, ))[0].mask
         scene = decode_segmap(det_result)
         return scene
 
@@ -77,6 +77,7 @@ class DrawArucoZone:
         self.config_path = config_path
         self.config = read_json(config_path)
 
+        marker_id = self.config["marker_idx"]
         marker_world_size = self.config["marker_world_size"]
         marker_size = ARUCO_MARKER_SIZE[self.config["marker_size"]]
         camera_params_dict = self.config["camera_params"]
@@ -84,13 +85,24 @@ class DrawArucoZone:
                                      np.array(camera_params_dict["distortion_vec"]),
                                      np.array(camera_params_dict["rotation_vec"]),
                                      np.array(camera_params_dict["translation_vec"]))
-        self.estimator = ArucoZoneEstimator(marker_world_size, 
-                                            marker_size, 
-                                            camera_params)
-        print("INITED".center(80))
+        wz_cx = self.config["wz_cx"]
+        wz_cy = self.config["wz_cy"]
+        wz_height = self.config["wz_height"]
+        wz_width = self.config["wz_width"]
+
+        zone = Workzone(wz_cx, wz_cy, wz_height, wz_width)
+        self.estimator = ArucoZoneEstimator(marker_world_size,
+                                            marker_size,
+                                            marker_id,
+                                            camera_params,
+                                            zone)
 
     def __call__(self, scene: Image) -> Image:
-        return self.estimator.estimate(scene, None)
+        zone_polygon = self.estimator.estimate(scene)
+        zone_polygon = np.array(zone_polygon).reshape(-1, 1, 2)
+        zone_polygon = np.clip(zone_polygon, 0, np.inf)
+        scene = cv2.polylines(scene, [np.int32(zone_polygon)], True, (255, 0, 0), 2, cv2.LINE_AA)
+        return scene
 
 
 def get_workzone_drawer() -> DrawArucoZone:
