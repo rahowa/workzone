@@ -46,14 +46,8 @@ class TorchvisionSegmentationWrapper(BaseWrapper):
         ready_images = self.preprocess(images)
         self.model.eval()
         with torch.no_grad():
-            # if len(ready_images.shape) == 3:
-            #     predictions = self.model(ready_images.unsqueeze(0))['out']
-            #     mask = torch.argmax(predictions.squeeze(), dim=0).cpu().numpy()
-            #     mask = cv2.resize(mask.astype(np.uint8), original_size)
-            #     return [SegmentationResult(mask)]
-            # else:
-                predictions = self.model(ready_images.unsqueeze(0))['out']
-                masks = torch.argmax(predictions, dim=1).cpu().numpy()
-                masks_resized = list(map(lambda img: cv2.resize(img.astype(np.uint8), original_size), masks))
-                return [SegmentationResult(mask)
-                        for mask in masks_resized]
+            predictions = self.model(ready_images.unsqueeze(0))['out']
+            masks = torch.argmax(predictions, dim=1).cpu().numpy()
+            masks_resized = list(map(lambda img: cv2.resize(img.astype(np.uint8), original_size), masks))
+            return [SegmentationResult(mask)
+                    for mask in masks_resized]
