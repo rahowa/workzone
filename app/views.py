@@ -6,19 +6,17 @@ from flask import Response, Blueprint, request
 
 sys.path.append("./robot_work_zone_estimation")
 
-from app.extensions import mongo
+from app.extensions import mongo, cache
 from app.route_utils import load_classes
 from app.fill_databse import FillDatabase
+from app.objects_utils import get_wrapper
 from app.mongo_controller import MongoController
 from app.image_decoding_utils import deocode_image
 from app.faces_utils import check_persons, detect_faces
-from app.nn_inference.detection.wrappers.detection_wrapper import YOLOWrapper
-from app.nn_inference.faces.wrappers.face_recognition_lib_wrapper import FaceRecognitionLibWrapper
-from app.nn_inference.segmentation.wrappers.torchvision_segmentation_wrapper import TorchvisionSegmentationWrapper
-from app.nn_inference.keypoints.wrappers.torchvision_keypoints_wrapper import TorchvisionKeypointsWrapper
-from robot_work_zone_estimation.src.aruco_zone_estimation import ArucoZoneEstimator, ARUCO_MARKER_SIZE
 from robot_work_zone_estimation.src.workzone import Workzone
-from robot_work_zone_estimation.src.calibrate_camera import CameraParams
+from robot_work_zone_estimation.src.calibrate_camera_utils import CameraParams
+from app.nn_inference.faces.wrappers.face_recognition_lib_wrapper import FaceRecognitionLibWrapper
+from robot_work_zone_estimation.src.aruco_zone_estimation import ArucoZoneEstimator, ARUCO_MARKER_SIZE
 
 
 bp_main = Blueprint('blueprint_main', __name__)
@@ -41,7 +39,7 @@ def face_processing(target: str) -> Union[Response, Any]:
 
     image = deocode_image(request.data)
     if target == "recognize":
-        db_controller = MongoController(mongo)  # TODO: cache results
+        db_controller = MongoController(mongo)
         recognition_result = check_persons(image, db_controller)
         response = {'faces_id': list(recognition_result)}
         response = json.dumps(response)
@@ -55,7 +53,6 @@ def face_processing(target: str) -> Union[Response, Any]:
         return Response("empty", status=404)
 
 
-# TODO: cache wrappers
 @bp_main.route("/object/<target>", methods=['POST'])
 def objects_processing(target: str) -> Response:
     """
@@ -73,35 +70,23 @@ def objects_processing(target: str) -> Response:
     """
 
     image = deocode_image(request.data)
-    if target == "segmentation":
-        wrapper = TorchvisionSegmentationWrapper()
-        wrapper.load()
-        res = wrapper.predict((image,))[0]
-        response = {'mask': res.to_dict(f"/object/{target}")}
-        response = json.dumps(response)
-        return Response(response, status=200, mimetype="application/json")
-    elif target == "detection":
-        wrapper = YOLOWrapper()
-        wrapper.load()
-        res = wrapper.predict((image,))[0]
-        response = {'boxes': res.to_dict(f"/object/{target}")}
-        response = json.dumps(response)
-        return Response(response, status=200, mimetype="application/json")
-    else:
-        wrapper = TorchvisionKeypointsWrapper()
-        wrapper.load()
-        res = wrapper.predict(image)[0]
-        response = {"keypoints": res.to_dict(f"/object/{target}")}
-        response = json.dumps(response)
-        return Response(response, status=200, mimetype="application/json")
+    wrapper, target_name = get_wrapper(target)
+    res = wrapper.predict((image, ))[0]
+    response = {target_name: res.to_dict(f"/object/{target}")}
+    response = json.dumps(response)
+    return Response(response, status=200, mimetype="application/json")
 
 
-# TODO: cache aruco params
-@bp_main.route("/workzone", methods=['POST'])
-def compute_workzone():
-    with open("robot_work_zone_estimation/aruco_config.json") as conf_file:
-        aruco_params = json.load(conf_file)
+@cache.cached(timeout=350, key_prefix="zone_estimator")
+def get_zone_estimator():
 
+    aruco_params = cache.get("aruco_params")
+    if aruco_params is None:
+        with open("robot_work_zone_estimation/aruco_config.json") as conf_file:
+            aruco_params = json.load(conf_file)
+        cache.set("aruco_params", aruco_params)
+
+    marker_id = aruco_params["marker_idx"]
     wz_cx = aruco_params["wz_cx"]
     wz_cy = aruco_params["wz_cy"]
     wz_height = aruco_params["wz_height"]
@@ -109,17 +94,31 @@ def compute_workzone():
     marker_world_size = aruco_params["marker_world_size"]
     marker_size = aruco_params["marker_size"]
     camera_params = aruco_params["camera_params"]
-    camera_params = CameraParams(np.array(camera_params['camera_mtx'], dtype=np.float),
-                                 np.array(camera_params['distortion_vec'], dtype=np.float),
-                                 np.array(camera_params['rotation_vec'], dtype=np.float),
-                                 np.array(camera_params['translation_vec'], dtype=np.float))
+    camera_params = CameraParams(np.array(camera_params['camera_mtx'],
+                                          dtype=np.float),
+                                 np.array(camera_params['distortion_vec'],
+                                          dtype=np.float),
+                                 np.array(camera_params['rotation_vec'],
+                                          dtype=np.float),
+                                 np.array(camera_params['translation_vec'],
+                                          dtype=np.float))
 
-    image = deocode_image(request.data)
     zone = Workzone(wz_cx, wz_cy, wz_height, wz_width)
-    estimator = ArucoZoneEstimator(marker_world_size,
-                                   ARUCO_MARKER_SIZE[marker_size],
-                                   camera_params,
-                                   zone)
+    estimator = cache.get("zone_estimator")
+    if estimator is None:
+        estimator = ArucoZoneEstimator(marker_world_size,
+                                       ARUCO_MARKER_SIZE[marker_size],
+                                       marker_id,
+                                       camera_params,
+                                       zone)
+        cache.set("zone_estimator", estimator)
+    return estimator
+
+
+@bp_main.route("/workzone", methods=['POST'])
+def compute_workzone():
+    image = deocode_image(request.data)
+    estimator = get_zone_estimator()
     zone_polygon = estimator.estimate(image)
     response = json.dumps({"workzone": zone_polygon})
     return Response(response, status=200, mimetype="application/json")
