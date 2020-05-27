@@ -1,11 +1,13 @@
 from app.nn_inference import keypoints
 import cv2
 import numpy as np
-from typing import List, Any, Tuple
+from typing import List, Any, Tuple, Optional
 from app.base_types import Image, Boxes
 
 
-def draw_bboxes(image: Image, bboxes: Boxes) -> Image:
+def draw_bboxes(image: Image,
+                bboxes: Boxes,
+                classes: Optional[Tuple[int]] = None) -> Image:
     """ Draw bbox in format (xmin, ymin, xmax, ymax)
         over the image
 
@@ -19,11 +21,22 @@ def draw_bboxes(image: Image, bboxes: Boxes) -> Image:
         -------
             image: image with drawed bboxes
     """
+
     color = (255, 255//2, 255//3)
     for bbox in bboxes:
         pt1 = (bbox[0], bbox[1])
         pt2 = (bbox[2], bbox[3])
         image = cv2.rectangle(image, pt1, pt2, color=color, thickness=2)
+
+    if classes is not None:
+        font = cv2.FONT_HERSHEY_SIMPLEX
+        font_scale = 1
+        color = (255, 0, 0)
+        thickness = 2
+        for idx, bbox in enumerate(bboxes):
+            pt1 = (bbox[0], bbox[1])
+            image = cv2.putText(image, classes[idx], pt1, font,
+                                font_scale, color, thickness)
     return image
 
 
@@ -54,7 +67,6 @@ def decode_segmap(image, nc=21):
         r[idx] = label_colors[l, 0]
         g[idx] = label_colors[l, 1]
         b[idx] = label_colors[l, 2]
-    print(image.shape, r.shape, g.shape, b.shape)
     rgb = np.stack([r, g, b], axis=-1)
     return rgb
 
