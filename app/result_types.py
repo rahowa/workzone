@@ -1,4 +1,5 @@
-from app.nn_inference import keypoints
+from app.nn_inference.common.utils import decode_segmap
+import cv2
 import os
 import numpy as np
 from nptyping import Array
@@ -6,8 +7,8 @@ from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
 from typing import Dict, Any, List
 
-from app.base_types import Box, Boxes
-from app.image_decoding_utils import encode_image
+from app.base_types import Boxes
+from app.image_decoding_utils import image_to_str
 
 
 
@@ -133,8 +134,9 @@ class SegmentationResult(BaseResult):
             result dict: Dict[str, str]
                 Dictionary prepared to serizlization
         """
+        print(self.mask.shape)
         return {
-            "mask": encode_image((self.mask * 255).astype(np.uint8))
+            "mask": image_to_str(decode_segmap(self.mask))
         }
 
 
