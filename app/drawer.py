@@ -47,9 +47,13 @@ class DrawObjectDetection:
         self.detector.load()
 
     def __call__(self, scene: Image) -> Image:
-        det_result = self.detector.predict(scene)
-        bboxes = [det.boxes for det in det_result if det.boxes != ()]
-        scene = draw_bboxes(scene, bboxes)
+        det_results = self.detector.predict((scene, ))
+
+        if not (len(det_results) == 1 and len(det_results[0].boxes) == 0):
+            #for det_result in det_results:
+            #    scene = draw_bboxes(scene, det_result.boxes)
+            scene = draw_bboxes(scene, det_results[0].boxes)
+
         return scene
 
 
