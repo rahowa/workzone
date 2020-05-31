@@ -27,16 +27,17 @@ def draw_bboxes(image: Image,
         pt1 = (bbox[0], bbox[1])
         pt2 = (bbox[2], bbox[3])
         image = cv2.rectangle(image, pt1, pt2, color=color, thickness=2)
-
+        
     if classes is not None:
+        print(classes)
         font = cv2.FONT_HERSHEY_SIMPLEX
-        font_scale = 1
+        font_scale = 1  
         color = (255, 0, 0)
         thickness = 2
         for idx, bbox in enumerate(bboxes):
-            pt1 = (bbox[0], bbox[1])
-            image = cv2.putText(image, classes[idx], pt1, font,
-                                font_scale, color, thickness)
+            pt1 = (bbox[0] - bbox[2]//2, bbox[1])
+            image = cv2.putText(image, f"person_id: {classes[idx]}", pt1, font,
+                                font_scale, color, thickness, cv2.LINE_AA)
     return image
 
 
