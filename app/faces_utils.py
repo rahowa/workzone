@@ -7,8 +7,8 @@ from app.mongo_controller import MongoController
 from app.nn_inference.faces.wrappers.face_recognition_lib_wrapper import FaceRecognitionLibWrapper
 
 
-@cache.memoize(3000)
-def get_known_encodings(db_controller) -> Descriptors:
+@cache.cached(3000)
+def get_known_encodings(db_controller: MongoController) -> Descriptors:
     return db_controller.all_valid_descriptors()
 
 
@@ -17,7 +17,7 @@ def check_persons(frame: Image, db_controller: MongoController) -> List[int]:
     if len(known_face_encodings) == 0:
         return list()
 
-    face_det = FaceRecognitionLibWrapper({"model_type": "cnn", "number_of_times_to_upsample": 0})
+    face_det = FaceRecognitionLibWrapper({"model_type": "hog", "number_of_times_to_upsample": 1})
     face_encodings = face_det.predict(frame).descriptors
     labels = list()
     for face_encoding in face_encodings:
