@@ -40,8 +40,11 @@ def face_processing(target: str) -> Union[Response, Any]:
     image = deocode_image(request.data)
     if target == "recognize":
         db_controller = MongoController(mongo)
+        face_locations = detect_faces(image)
         recognition_result = check_persons(image, db_controller)
-        response = {'faces_id': list(recognition_result)}
+        response = {'faces_id': list(recognition_result),
+                    'faces_loc': list(face_locations)
+                    }
         response = json.dumps(response)
         return Response(response, status=200, mimetype="application/json")
     elif target == "detect":
