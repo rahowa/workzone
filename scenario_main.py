@@ -1,22 +1,29 @@
-import sys
 import asyncio
 from frozendict import frozendict
 from argparse import ArgumentParser
 
-# sys.path.append("./app")
-
 from scenarios.scenario_zone_estimation import main_zone_estimation
 from scenarios.scenario_face_detection import main_face_detection
 from scenarios.scenario_zone_protection import main_zone_protection
+from scenarios.scenario_person_detection import main_person_detection
+from scenarios.scenario_person_segmentation import main_person_segmentation
+from scenarios.scenario_face_recognition import main_face_recognition
 
 
 CONTENT_TYPE = 'image/jpeg'
 HEADERS = {'content-type': CONTENT_TYPE}
-OPERATIONS = ["object_detection", "zone_estimation", "zone_protection"]
+OPERATIONS = ["object_detection", "zone_estimation",
+              "zone_protection", "person_detection",
+              "person_segmentation", "face_detection",
+              "face_recognition"]
 OPERATION_TO_IMPL = frozendict(
     object_detection=main_face_detection,
     zone_estimation=main_zone_estimation,
-    zone_protection=main_zone_protection
+    zone_protection=main_zone_protection,
+    person_detection=main_person_detection,
+    person_segmentation=main_person_segmentation,
+    face_detection=main_face_detection,
+    face_recognition=main_face_recognition
 )
 
 
