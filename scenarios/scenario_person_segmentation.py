@@ -1,10 +1,13 @@
 import cv2
 import requests
-import numpy as np
+import base64
+
+from app.nn_inference.common.utils import decode_segmap
+from app.image_decoding_utils import deocode_image
 
 
-def main_zone_estimation(address: str) -> None:
-    route = "workzone"
+def main_person_segmentation(address: str) -> None:
+    route = "object/segmentation"
     test_url = f"{address}/{route}"
     content_type = 'image/jpeg'
     headers = {'content-type': content_type}
@@ -12,7 +15,7 @@ def main_zone_estimation(address: str) -> None:
     cap = cv2.VideoCapture(0)
     cap.set(3, 640)
     cap.set(4, 480)
-    
+
     while True:
         ret, frame = cap.read()
         if not ret:
@@ -21,11 +24,10 @@ def main_zone_estimation(address: str) -> None:
         response = requests.post(test_url,
                                  data=image_to_send.tostring(),
                                  headers=headers)
-        zone_polygon = response.json()["workzone"]
-        zone_polygon = np.array(zone_polygon).reshape(-1, 1, 2)
-        zone_polygon = np.clip(zone_polygon, 0, np.inf)
-        frame = cv2.polylines(frame, [np.int32(zone_polygon)], True, (255, 0, 0), 2, cv2.LINE_AA)
-        cv2.imshow("test case", frame)
+        detections = response.json()["mask"]
+        mask = base64.decodebytes(detections["mask"].encode("utf-8"))
+        mask = deocode_image(mask)
+        cv2.imshow("test case", mask)
 
         if cv2.waitKey(1) & 0xFF == ord('q'):
             break

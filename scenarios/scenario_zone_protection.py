@@ -35,12 +35,12 @@ def draw_workzone(frame, zone_polygon) -> Image:
 
 
 def alarm(polygon: List[Tuple[int, int]],
-               keypoints: List[List[Tuple[float, float, float]]]) -> None:
-    polygon = tuple(Point(point[0], point[1]) for point in polygon)
+          keypoints: List[List[Tuple[float, float, float]]]) -> None:
+    polygon_points = tuple(Point(point[0], point[1]) for point in polygon)
     for persons_kp in keypoints:
         for point in persons_kp:
             if point[2]:
-                if is_inside(polygon, Point(point[0], point[1])):
+                if is_inside(polygon_points, Point(point[0], point[1])):
                     print("ALARM! PERSON IS IN DANGER ZONE!")
 
 

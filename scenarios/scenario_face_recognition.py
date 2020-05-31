@@ -1,10 +1,11 @@
 import cv2
 import requests
-import numpy as np
+
+from app.nn_inference.common.utils import draw_bboxes
 
 
-def main_zone_estimation(address: str) -> None:
-    route = "workzone"
+def main_face_recognition(address: str) -> None:
+    route = "face/recognize"
     test_url = f"{address}/{route}"
     content_type = 'image/jpeg'
     headers = {'content-type': content_type}
@@ -12,7 +13,6 @@ def main_zone_estimation(address: str) -> None:
     cap = cv2.VideoCapture(0)
     cap.set(3, 640)
     cap.set(4, 480)
-    
     while True:
         ret, frame = cap.read()
         if not ret:
@@ -21,12 +21,13 @@ def main_zone_estimation(address: str) -> None:
         response = requests.post(test_url,
                                  data=image_to_send.tostring(),
                                  headers=headers)
-        zone_polygon = response.json()["workzone"]
-        zone_polygon = np.array(zone_polygon).reshape(-1, 1, 2)
-        zone_polygon = np.clip(zone_polygon, 0, np.inf)
-        frame = cv2.polylines(frame, [np.int32(zone_polygon)], True, (255, 0, 0), 2, cv2.LINE_AA)
-        cv2.imshow("test case", frame)
+        response_json = response.json()
+        boxes = response_json["faces_loc"]
+        ids = response_json["faces_id"]
+        if len(boxes) > 0:
+            frame = draw_bboxes(frame, boxes, ids)
 
+        cv2.imshow("test case", frame)
         if cv2.waitKey(1) & 0xFF == ord('q'):
             break
 
