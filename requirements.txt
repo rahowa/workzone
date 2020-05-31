@@ -16,3 +16,5 @@ requests
 aiohttp[speedups]
 torch
 torchvision
+gluoncv
+mxnet
