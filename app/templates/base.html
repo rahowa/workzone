@@ -1,0 +1,17 @@
+<html>
+    <head>
+      {% if title %}
+      <title>{{ title }} - Workzone</title>
+      {% else %}
+      <title>Welcome to Workzone</title>
+      {% endif %}
+    </head>
+    <body>
+        <div>
+            <a href="/workzone_stream">Workzone</a>
+            <a href="/face">Faces</a>
+        </div>
+        <hr>
+        {% block content %}{% endblock %}
+    </body>
+</html>
